@@ -1,0 +1,27 @@
+{
+  "name": "koc",
+  "version": "0.0.0",
+  "description": "Library to communicate with the online MMORPG Kings of Chaos",
+  "main": "koc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ThomasDalla/node-koc"
+  },
+  "keywords": [
+    "koc",
+    "kings",
+    "of",
+    "chaos",
+    "mmorpg",
+    "game",
+    "online"
+  ],
+  "author": "Thomas Dall'Agnese <thomas.dallagnese@gmail.com> (http://www.dallagnese.fr/)",
+  "license": "GPL v2",
+  "bugs": {
+    "url": "https://github.com/ThomasDalla/node-koc/issues"
+  }
+}
