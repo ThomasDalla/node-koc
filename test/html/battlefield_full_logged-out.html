@@ -1,0 +1,554 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<title>Kings of Chaos :: Battlefield</title>
+	<link rel="icon" href="http://www.kingsofchaos.com/favicon.ico" />
+	<link rel="shortcut icon" href="http://www.kingsofchaos.com/favicon.ico" />
+	<link href="/images/css/common.css" rel="stylesheet" type="text/css" />
+	<link href="/images/css/main.css" rel="stylesheet" type="text/css" />
+  <link type="text/css" href="/inviter/res/style.css" rel="stylesheet" />
+  <script src="/images/jquery.min.js" type="text/javascript"></script>
+  <script type="text/javascript" src="http://w.sharethis.com/widget/?tabs=web%2Cpost&amp;charset=utf-8&amp;style=rotate&amp;publisher=61b27ec8-6172-4261-a2f9-f5eed4bfffcb&amp;linkfg=%23545e7d"></script>
+	<META name="verify-v1" content="W8cx8aSLkZX2ZC64sipZmhlBY149culcmvlJ0orWkAA=" />
+
+<script language="javascript">
+<!--
+function newcap()
+{
+	thesrc = "/chk/turing.image.php";
+	newsrc = thesrc+"?"+Math.round(Math.random()*100000);
+
+	document.getElementById('curcap').src = newsrc;
+
+	if (document.getElementById('curcap2'))
+		document.getElementById('curcap2').src = newsrc;
+	if (document.getElementById('curcap3'))
+		document.getElementById('curcap3').src = newsrc;
+}
+    function openchatwin() {
+            var popurl="chat/";
+            winpops=window.open(popurl,"","width=750,height=550");
+    }
+
+	function checksize() {
+		var myWidth = 0, myHeight = 0;
+		if( typeof( window.innerWidth ) == 'number' ) {
+			//Non-IE
+			myWidth = window.innerWidth;
+			myHeight = window.innerHeight;
+		} else if( document.documentElement &&
+				( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
+			//IE 6+ in 'standards compliant mode'
+			myWidth = document.documentElement.clientWidth;
+			myHeight = document.documentElement.clientHeight;
+		} else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
+			//IE 4 compatible
+			myWidth = document.body.clientWidth;
+			myHeight = document.body.clientHeight;
+		}
+
+		if (myWidth != '' || myHeight != '')
+			document.write("<img width=1 height=1 src=\"/setres.php?height=" + myHeight + "&width=" + myWidth + "\">");
+	}
+
+	if (top.frames.length > 0)
+		top.location = self.loc</img;
+	if (top != self)
+		top.location=self.location;    
+	
+	document.domain = 'kingsofchaos.com';
+-->
+</script>
+
+	<META NAME="keywords" CONTENT="kingsofchaos, chaos, elves, humans, dwarves, orcs, rpg, mmorpg, role playing, game, online game, text based game, armory, mercenaries, spy, attack, army, battle, recruit, spies, spy skill, weapons, messaging, sabotage, recon, intelligence, pnp, mud, games, stockade, free, browser game">
+	<META NAME="description" CONTENT="Build your army, conquer your enemies, become a King of Chaos!">
+	<META NAME="author" CONTENT="Kings of Chaos">
+
+	<script language="javascript" type="text/javascript">
+	function checkCR(evt) {
+	  var evt = (evt) ? evt : ((event) ? event : null);
+	  var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+	  if ((evt.keyCode == 13) && (node.type=="text") && (node.id != 'recaptcha_response_field') && (node.id != "box")) {
+      return false;
+    }
+	}
+	document.onkeypress = checkCR;
+	</script>
+</head>
+<body bgcolor="#000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" text="#FFFFFF" onload="if (box = document.getElementById('box')) box.focus();">
+<span style="position: absolute; right: 2; top: 2; z-index:10;font-size:x-small; color:#999999;"></span>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" height="164" background="/images/main/small_repeater.jpg">
+  <tr> 
+  	    <td valign="top" align="center" >
+		<table border="0" cellspacing="0" cellpadding="0">
+		<tr>
+		  	<td><img src="/images/main/small_topbanner_01.gif"></td>
+		  	<td><img src="/images/main/small_topbanner_02.gif"></td>
+			<td><img src="/images/main/small_topbanner_03.gif"></td>
+		</tr>
+		<tr>
+    	  	<td><a href="http://www.kingsofchaos.com/"><img alt="Main" src="/images/main/small_topbanner_04.gif"></a></td>
+			<td><a href="http://www.kingsofchaos.com/"><img alt="  K  " src="/images/main/small_topbanner_05.jpg"></a></td>
+			<td><a href="http://www.giveupalready.com/forumdisplay.php?f=31" target="_new"><img alt="Forum" src="/images/main/small_topbanner_06.gif"></a></td>
+	    </tr>
+		<tr>
+   		    <td><a href="battlefield.php?start=0"><img alt="Rankings" src="/images/main/small_topbanner_07.gif"></a></td>
+			<td><a href="http://www.kingsofchaos.com/"><img alt="  o  " src="/images/main/small_topbanner_08.jpg"></a></td>
+			<td><a href="javascript: openchatwin()"><img alt="Chat" src="/images/main/small_topbanner_09.gif"></a></td>
+        </tr>
+		<tr>
+		    <td><a href="help.php#"><img alt="Help" src="/images/main/small_topbanner_10.gif"></a></td>
+			<td><a href="http://www.kingsofchaos.com/"><img alt="  f  " src="/images/main/small_topbanner_11.gif"></a></td>
+			<td>&nbsp;</td>
+      	</tr>
+		<tr>
+		    <td><img src="/images/main/small_topbanner_13.gif"></td>
+			<td><a href="http://www.kingsofchaos.com/"><img alt="  C  " src="/images/main/small_topbanner_14.gif"></a></td>
+			<td><img src="/images/main/small_topbanner_15.gif"></td>
+	    </tr>
+	    </table>
+	</td>
+	<td valign="top" style="padding-top: 25px;">
+	 	 
+<!-- Kings of Chaos - 728x90 - Game Advertising Online -->
+<iframe marginheight=0 marginwidth=0 scrolling=no frameborder=0 width=728 height=90 src=http://www.game-advertising-online.com/index.php?section=serve&id=146 target=_blank></iframe><noframes><a href="http://www.game-advertising-online.com/" target=_blank>Game Advertising Online</a><br> banner requires iframes</noframes>
+<!-- END GAO 728x90 -->
+	</td>
+	  </tr>
+</table>
+<table width="100%" border="0" cellspacing="0" cellpadding="5">
+  <tr> 
+        <td width="140" class="menu_cell" style="padding-left: 10px;" valign="top"> 
+	      <table width="137" border="0" cellspacing="0" cellpadding="0">
+		<tr><td><img src="/images/menubar/age17.gif?v2" width="137" height="56"></td></tr> 
+				<tr><td class="menu_cell_repeater"><form action="login.php" method="post">
+<input type="hidden" name="username">
+<input type="hidden" name="pword">
+<table align="center" class="small" style="padding: 0px 0px 5px 0px;" width="130">
+	<tr>
+		<td align="center"><font color="black">Username:</font></td>
+	</tr>
+	<tr>
+		<td align="center"><input class="login_input" type="text" name="usrname" value=""></td>
+	</tr>
+		<tr>
+		<td align="center"><font color="black">Password:</font></td>
+	</tr>
+	<tr>
+		<td align="center"><input class="login_input" type="password" name="peeword"></td>
+	</tr>
+	<tr>
+		<td align="center" style="padding-top: 5px;"><input class="login_input" type="submit" value="Login" style="width: 50px;"></td>
+	</tr>
+</table>
+<input type="hidden" name="hash" value="">
+</form></td></tr>
+		<tr><td class="menu_cell_repeater_vert" align="center"><a href="index.php?register=true">Register</a></td></tr>
+		<tr><td class="menu_cell_repeater_vert" align="center"><a href="forgotpass.php">Forgot Login?</a></td></tr>
+        <tr><td><img border="0" src="/images/menubar/menulinks_12.gif"></a></td></tr>
+				</table>
+		<p>
+				<center>
+		<style>
+			span.textad, span.textad a {
+				font-size: 8pt;
+			}
+		</style>
+		<span class="textad">
+				Bored? Play <a href="flashgames.php" style="font-size: 8pt;">Flash Games</a>
+				</font>
+		</center>
+		<p>
+												<p>
+		<table width="137" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td><img src="/images/menubar/skyscraper_top.gif"></td>
+		</tr>
+		<tr>
+			<td align="center" class="menu_cell_repeater_vert">
+			 	 
+<!-- Kings of Chaos - 120x600 - Game Advertising Online -->
+<iframe marginheight=0 marginwidth=0 scrolling=no frameborder=0 width=120 height=600 src=http://www.game-advertising-online.com/index.php?section=serve&id=150 target=_blank></iframe><noframes><a href="http://www.game-advertising-online.com/" target=_blank>Game Advertising Online</a><br> banner requires iframes</noframes>
+<!-- END GAO 120x600 -->
+			</td>
+		</tr>
+		<tr>
+			<td><img src="/images/menubar/skyscraper_bottom.gif"></td>
+		</tr>
+		</table>
+				<center>
+				<p>
+		<a href="http://www.spreadfirefox.com/?q=affiliates&amp;id=8415&amp;t=71"><img border="0" alt="Get Firefox!" title="Get Firefox!" src="/images/safer.gif"/></a><br>
+		<p>
+		<script type="text/javascript" language="javascript1.2">
+			checksize();
+		</script>
+		</center>
+    </td>
+      <td style="padding-left: 10px; padding-top: 5px; padding-right: 5px;" valign="top" align="left" class="content">
+	<style type="text/css">
+  tr.profile{ border: 0px; border-bottom: 1px solid black; }
+  tr.profile td { border: 0px; padding: 2px; border-bottom: 1px solid #333333; }
+  tr.profile td td { border-bottom: 0px; }
+  tr.current td { border-bottom: 0; }
+</style>
+<table class="table_lines battlefield" width="100%" cellspacing="0" cellpadding="6" border="0">
+	<tr>
+				<th cellpadding=0>Alliance</th>
+		<th>Name</th>
+		<th colspan="2">Army Size</th>
+		<th>Treasury</th>
+		<th>Rank</th>
+	</tr>
+  		<tr class="player" user_id="4410444" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4410444" >Alpha-SR</a></td>
+		<td align="right">19,599,967</td>
+		<td align="left">
+							Undead
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">1</td>
+	</tr>
+		<tr class="player" user_id="4411029" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4411029" >Stormforce-RoFL</a></td>
+		<td align="right">11,804,424</td>
+		<td align="left">
+							Humans
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">2</td>
+	</tr>
+		<tr class="player" user_id="4455498" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4455498" >Burntorc_LoP</a></td>
+		<td align="right">10,216,508</td>
+		<td align="left">
+							Humans
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">3</td>
+	</tr>
+		<tr class="player" user_id="4347805" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4347805" >Dark_Mirage</a></td>
+		<td align="right">9,463,540</td>
+		<td align="left">
+							Humans
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">4</td>
+	</tr>
+		<tr class="player" user_id="4440246" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4440246" >Sigma-SR</a></td>
+		<td align="right">12,490,797</td>
+		<td align="left">
+							Elves
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">5</td>
+	</tr>
+		<tr class="player" user_id="4465753" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4465753" >FearlessOrc</a></td>
+		<td align="right">9,431,629</td>
+		<td align="left">
+							Undead
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">6</td>
+	</tr>
+		<tr class="player" user_id="4359186" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4359186" >RelentlessLegacy</a></td>
+		<td align="right">8,183,090</td>
+		<td align="left">
+							Humans
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">7</td>
+	</tr>
+		<tr class="player" user_id="4429892" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4429892" >Krieper-SR</a></td>
+		<td align="right">6,607,826</td>
+		<td align="left">
+							Humans
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">8</td>
+	</tr>
+		<tr class="player" user_id="4487388" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4487388" >Hatsune_Miku</a></td>
+		<td align="right">5,491,098</td>
+		<td align="left">
+							Humans
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">9</td>
+	</tr>
+		<tr class="player" user_id="4466059" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4466059" >Chris20040719</a></td>
+		<td align="right">6,029,182</td>
+		<td align="left">
+							Orcs
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">10</td>
+	</tr>
+		<tr class="player" user_id="4008424" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4008424" >Goldfish-</a></td>
+		<td align="right">5,005,831</td>
+		<td align="left">
+							Undead
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">11</td>
+	</tr>
+		<tr class="player" user_id="4434148" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4434148" >Zanax</a></td>
+		<td align="right">8,215,109</td>
+		<td align="left">
+							Humans
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">12</td>
+	</tr>
+		<tr class="player" user_id="4442116" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4442116" >b0neZ</a></td>
+		<td align="right">6,932,653</td>
+		<td align="left">
+							Humans
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">13</td>
+	</tr>
+		<tr class="player" user_id="4463839" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4463839" >Ravi-LoP</a></td>
+		<td align="right">3,301,586</td>
+		<td align="left">
+							Undead
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">14</td>
+	</tr>
+		<tr class="player" user_id="2703342" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=2703342" >FighterOfLife_LaCN</a></td>
+		<td align="right">7,962,928</td>
+		<td align="left">
+							Undead
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">15</td>
+	</tr>
+		<tr class="player" user_id="4488060" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4488060" >tuco</a></td>
+		<td align="right">4,298,102</td>
+		<td align="left">
+							Humans
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">16</td>
+	</tr>
+		<tr class="player" user_id="4441243" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4441243" >ldavis07</a></td>
+		<td align="right">3,949,349</td>
+		<td align="left">
+							Humans
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">17</td>
+	</tr>
+		<tr class="player" user_id="4487381" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4487381" >brownie</a></td>
+		<td align="right">2,212,380</td>
+		<td align="left">
+							Humans
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">18</td>
+	</tr>
+		<tr class="player" user_id="4404989" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4404989" >Janky</a></td>
+		<td align="right">1,029,033</td>
+		<td align="left">
+							Undead
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">19</td>
+	</tr>
+		<tr class="player" user_id="4160615" >
+		    <td align="right" style="color: #ffffff;"><a href="alliances.php?id=">
+      &nbsp;</a></td>
+		<td><a class="player" href="/stats.php?id=4160615" >illkeyone</a></td>
+		<td align="right">2,342,313</td>
+		<td align="left">
+							Orcs
+					</td>
+		<td align="right" style="padding-right: 20px;">??? Gold</td>
+		<td align="right" style="padding-right: 20px;">20</td>
+	</tr>
+	    <tr class="nav">
+            <td>&nbsp;</td>
+	        <td colspan="4" align="center">2,110 players total | page 1 of 106</td>
+	        <td align="right"><a href="battlefield.php?start=20&search=&search_type=&buddy_type=">Next &gt;&gt;</a></td>
+	    </tr></table>
+<p>
+<form action="battlefield.php" method="get">
+<table class="table_lines" align="center" width="550" cellspacing="0" cellpadding="6" border="0">
+	<tr>
+		<th colspan="2" align="center">Search</th>
+	</tr>
+	<tr>
+		<td align="right">Jump to page:</td>
+		<td align="left"><input type="text" name="jump" size="5" maxlength="5"> <input type="submit" value="Go"></td>
+	</tr>
+	<tr>
+		<td align="right">Search by username:</td>
+		<td align="left">
+			<select name="search_type">
+				<option label="starts with" value="s">starts with</option>
+<option label="contains" value="c">contains</option>
+<option label="ends with" value="e">ends with</option>
+
+			</select>
+		<input type="text" name="search" value=""> <input type="submit" value="Go"></td>
+	</tr>
+  <tr>
+    <td align="right">Filter by buddy type:</td>
+    <td align="left">
+      <select name="buddy_type">
+        <option label="none" value="none" selected="selected">none</option>
+<option label="neutral" value="neutral">neutral</option>
+<option label="friend" value="friend">friend</option>
+<option label="enemy" value="enemy">enemy</option>
+<option label="ignored" value="ignored">ignored</option>
+
+      </select>
+		<input type="submit" value="Go"></td>
+    </td>
+</table>
+</form>
+<p>
+<center>Rankings will be updated in 26 
+minutes.
+</center>
+<p>
+<script type="text/javascript">
+  function battlefield_players(){
+    $('table.battlefield tr.player a.player').click(function(){
+      var row = $(this).parents('tr.player')
+
+      if (row.next().is('.profile')) {
+        row.next().remove();
+        row.removeClass('current')
+      } else {
+        $.get('/stats.php?id='+row.attr('user_id'), function(data){
+          $('table.battlefield tr.current').removeClass('current')
+          $('table.battlefield tr.profile').remove()
+          row.addClass('current')
+          row.after(
+            $('<tr class="profile"><td colspan="6"></td></tr>').find('td').html(data).end()
+          )
+          $('span.alliance:gt(10)').hide(); $('span.alliance:eq(10)').after( $('<a href="#">...</a>').click(function(){ $(this).remove(); $('span.alliance').show(); return false }) )
+          profile_buddy_change()
+        })
+      }
+
+      return false
+    })
+  }
+  function battlefield_nav(){
+    $('table.battlefield tr.nav a').click(function(){
+      $.get($(this).attr('href'), function(data){
+        $('table.battlefield tr:first').nextAll().remove()
+        $('table.battlefield tr:first').after(data)
+
+        battlefield_players()
+        battlefield_nav()
+      })
+      return false
+    })
+  }
+  function profile_buddy_change(){
+    $('select[name=buddy_type]').change(function(){
+      var select = $(this)
+      $.post('/addbuddy.php', select.parents('form:first').serialize(), function(){
+        var img = select.prev()
+        var val = select.find('option:selected').attr('value')
+
+        img.add( img.parents('tr.profile').prev().find('td > img.buddy_type') ).each(function(){
+          var i = $(this)
+          i.attr('src', img.attr('src').replace(/icon_.*\.gif/, 'icon_' + val + '.gif'))
+          if (val == 'none')
+            i.hide()
+          else
+            i.show()
+        })
+      })
+    })
+  }
+  battlefield_players()
+  battlefield_nav()
+</script>
+<center>
+<p>
+<p>
+<font style="font-size: 8pt;">
+<a href="spam.php">Report Spam</a> | <a href="privacy.php">Privacy Policy</a> | <a href="mailto:%62%69%7a%64%65%76%40%6b%69%6e%67%73%6f%66%63%68%61%6f%73%2e%63%6f%6d">Business Queries</a> | <a href="tos.php">Terms of Service</a>
+<p>
+<i>Copyright &copy; 2003-2012 Kings of Chaos, LLC. All rights reserved.<br>Kings of Chaos &reg; is a registered trademark of Kings of Chaos, LLC.</i><br>
+</font>
+</center>
+	</td>
+			</td>
+		</tr>
+</table>
+<!-- Start Quantcast tag -->
+<script type="text/javascript" src="http://edge.quantserve.com/quant.js"></script>
+<script type="text/javascript">_qacct="p-a6NrObxziz_36";quantserve();</script>
+<noscript>
+<a href="http://www.quantcast.com/p-a6NrObxziz_36" target="_blank"><img src="http://pixel.quantserve.com/pixel/p-a6NrObxziz_36.gif" style="display: none;" border="0" height="1" width="1" alt="Quantcast"/></a>
+</noscript>
+<!-- End Quantcast tag -->
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+  _uacct = "UA-75146-1";
+  urchinTracker();
+</script>
+
+</body>
+</html>
