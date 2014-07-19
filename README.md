@@ -1,4 +1,4 @@
 node-koc
 ========
 
-Node library to communicate with the online MMORPG Kings of Chaos
+Node library to parse data from the online MMORPG Kings of Chaos
