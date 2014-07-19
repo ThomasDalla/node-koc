@@ -4,7 +4,7 @@
   "description": "Library to communicate with the online MMORPG Kings of Chaos",
   "main": "koc.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "make test"
   },
   "repository": {
     "type": "git",
@@ -23,5 +23,9 @@
   "license": "GPL v2",
   "bugs": {
     "url": "https://github.com/ThomasDalla/node-koc/issues"
+  },
+  "devDependencies": {
+    "mocha": "1.x.x",
+    "chai": "1.x.x"
   }
 }
