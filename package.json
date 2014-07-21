@@ -24,8 +24,13 @@
   "bugs": {
     "url": "https://github.com/ThomasDalla/node-koc/issues"
   },
+  "dependencies": {
+    "q": "1.x.x",
+    "request": "2.x.x"
+  },
   "devDependencies": {
     "mocha": "1.x.x",
-    "chai": "1.x.x"
+    "chai": "1.x.x",
+    "chai-as-promised": "4.x.x"
   }
 }
