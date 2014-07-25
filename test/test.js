@@ -25,8 +25,7 @@ describe('Parse Battlefield' , function() {
         var requiredFields = ['userid','alliance','username','armySize','race','gold','rank'];
         for(var i in requiredFields){
           it( "player #" + (index+1) + " should have '" + requiredFields[i] +"'", function() {
-            return player.should.have.property(requiredFields[i])
-              && player[requiredFields[i]].should.not.be.undefined;
+            return player.should.have.property(requiredFields[i]).that.is.not.undefined;
           });
         }
       }
@@ -41,13 +40,13 @@ describe('Login' , function() {
       return loginPromise.should.be.fulfilled;
     });
     it('should have KOC_SESSION_COOKIE field', function() {
-      return loginPromise.should.eventually.have.property("KOC_SESSION_COOKIE");
+      return loginPromise.should.eventually.have.property("KOC_SESSION_COOKIE").that.is.not.empty;
     });
     it('should have success field', function() {
-      return loginPromise.should.eventually.have.property("success");
+      return loginPromise.should.eventually.have.property("success").that.is.false;
     });
     it('should have error field', function() {
-      return loginPromise.should.eventually.have.property("error");
+      return loginPromise.should.eventually.have.property("error").that.is.not.empty;
     });
   });
 });
@@ -59,10 +58,46 @@ describe('ReCaptcha Image', function() {
       return imagePromise.should.be.fulfilled;
     });
     it('should have success field', function() {
-      return imagePromise.should.eventually.have.property("success");
+      return imagePromise.should.eventually.have.property("success").that.is.true;
     });
     it('should have image field', function() {
-      return imagePromise.should.eventually.have.property("image");
+      return imagePromise.should.eventually.have.property("image").that.is.not.empty;
+    });
+    it('should have challenge field', function() {
+      return imagePromise.should.eventually.have.property("challenge").that.is.not.empty;
     });
   })
+});
+
+describe('Signup', function() {
+  describe('#verification wrong username and password', function() {
+    var verifyPromise = koc.verify("wrong username","wrong password","not same password");
+    it('should be fulfilled', function() {
+      return verifyPromise.should.be.fulfilled;
+    });
+    it('should have success field', function() {
+      return verifyPromise.should.eventually.have.property("success").that.is.true;
+    });
+    it('should have username field', function() {
+      return verifyPromise.should.eventually.have.property("username").that.is.not.empty;
+    });
+    it('should have password field', function() {
+      return verifyPromise.should.eventually.have.property("password").that.is.not.empty;
+    });
+  });
+  describe('#verification wrong username correct pass', function() {
+    var verifyPromise = koc.verify("wrong username","AcceptedPass","AcceptedPass");
+    it('should be fulfilled', function() {
+      return verifyPromise.should.be.fulfilled;
+    });
+    it('should have success field', function() {
+      return verifyPromise.should.eventually.have.property("success").that.is.true;
+    });
+    it('should have username field', function() {
+      return verifyPromise.should.eventually.have.property("username").that.is.not.empty;
+    });
+    it('should have password field', function() {
+      return verifyPromise.should.eventually.have.property("password").that.is.empty;
+    });
+  });
 });
