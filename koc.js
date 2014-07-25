@@ -328,7 +328,7 @@ koc.verify = function(username, password, password2) {
                 details: body
             };
         }
-    }, true);
+    }, true );
 }
 
 module.exports = koc;
