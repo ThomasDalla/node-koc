@@ -104,6 +104,7 @@ koc.prototype.updateKocSession = function( headers ) {
 
 koc.prototype.createRequestPromise = function( options, onSuccess ) {
     var _koc = this;
+    var catchVerify = options.url.indexOf("verify") == -1;
     var p = request(options)
     .then( function(res) {
         var response = res[0];
@@ -121,13 +122,15 @@ koc.prototype.createRequestPromise = function( options, onSuccess ) {
             return {
                 success: false,
                 error: getErrorMessage( body ),
+                location: "error",
                 session: _koc.getSession()
             };
         }
-        if(response.request.path == "/verify.php") {
+        if(catchVerify && response.request.path == "/verify.php") {
             return {
                 success: false,
                 error: "You must verify your account (e-mail) before you can play Kings of Chaos",
+                location: "verify",
                 session: _koc.getSession()
             };
         }
