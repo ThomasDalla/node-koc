@@ -1,7 +1,8 @@
 var chai           = require('chai'),
     chaiAsPromised = require("chai-as-promised"),
     fs             = require('fs'),
-    koc            = require('../koc');
+    KoC            = require('../koc'),
+    koc            = new KoC();
 chai.use(chaiAsPromised);
 var should = chai.should();
 
@@ -39,7 +40,7 @@ describe('Login' , function() {
     it('should be fulfilled', function() {
       return loginPromise.should.be.fulfilled;
     });
-    it('should have KOC_SESSION_COOKIE field', function() {
+    it('should have a session field', function() {
       return loginPromise.should.eventually.have.property("session").that.is.not.empty;
     });
     it('should have success field', function() {
