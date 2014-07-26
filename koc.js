@@ -104,7 +104,8 @@ koc.prototype.updateKocSession = function( headers ) {
 
 koc.prototype.createRequestPromise = function( options, onSuccess ) {
     var _koc = this;
-    var catchVerify = options.url.indexOf("verify") == -1;
+    // Don't catch verify as error if that's what we asked for!
+    var catchVerify = options.url.indexOf("verify") == -1 && options.url.indexOf("signup") == -1;
     var p = request(options)
     .then( function(res) {
         var response = res[0];
@@ -294,14 +295,14 @@ koc.prototype.register = function(race, username, password, email, challenge, ch
                             if( response.request.path == '/verify.php?sent=true') {
                                 return {
                                     success: true,
-                                    message: "Check your e-mails to validate the account",
+                                    message: "You should receive an e-mail shortly to validate your account",
                                     session: _koc.getSession()
                                 };
                             }
                             else {
-                                var message = "There was an issue sending the verification mail";
+                                var message = "Account created but issue sending the verification mail";
                                 if( response.request.path == "/verify.php?invalid=true" ) {
-                                    message = "Invalid e-mail or already taken";
+                                    message = "Account created but invalid or already taken e-mail";
                                 }
                                 return {
                                     success: true,
