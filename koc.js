@@ -36,8 +36,9 @@ var getTuring = function(html) {
  * @param {Text} new_session_id
  */
 koc.setSession = function( new_session ) {
-    if( new_session !== undefined && new_session.length )
+    if( new_session !== undefined && new_session.length ) {
         this.session = new_session;
+    }
 };
 
 /**
@@ -83,7 +84,7 @@ var getErrorMessage = function( html ) {
 };
 
 koc.updateKocSession = function( headers ) {
-    if( headers === undefined || !headers.length ) return;
+    if( headers === undefined ) return;
     var setCookie = headers['set-cookie'];
     var _koc = this;
     if( setCookie !== undefined && setCookie.length>0 ) {
