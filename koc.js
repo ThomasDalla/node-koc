@@ -1,15 +1,20 @@
+// Libs
 var Q       = require('q');
 var request = Q.denodeify(require('request'));
-var util   = require("util");
-const KOC_SESSION_COOKIE = "koc_session";
-const KOC_HOST           = "http://www.kingsofchaos.com";
-const KOC_RECAPTCHA_URL  = "http://www.google.com/recaptcha/api/challenge?k=6LcvaQQAAAAAACnjh5psIedbdyYzGDb0COW82ruo";
-const RECAPTCHA_IMAGE   = "%simage?c=%s"; // path to the ReCaptcha image from (server, challenge)
+var util    = require("util");
+
+// Constants
+const KOC_SESSION_COOKIE_NAME = "koc_session";
+const KOC_HOST                = "http://www.kingsofchaos.com";
+const KOC_RECAPTCHA_URL       = "http://www.google.com/recaptcha/api/challenge?k=6LcvaQQAAAAAACnjh5psIedbdyYzGDb0COW82ruo";
+const RECAPTCHA_IMAGE         = "%simage?c=%s"; // path to the ReCaptcha image from (server, challenge)
+
+// Our Lib
 var koc = {
-    KOC_SESSION_COOKIE: ""
+    session: ""
 };
 
-var validateEmail = function(email) { 
+var validateEmail = function(email) {
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
 };
@@ -19,17 +24,34 @@ var getRecaptchaImage = function(server, challenge) {
 };
 
 var getTuring = function(html) {
-    var re = /name="turing"\s*value="([^"]+)">/gmi; 
+    var re = /name="turing"\s*value="([^"]+)">/gmi;
     var m  = re.exec(html);
     if(m!==null)
         return m[1];
     return html;
-}
+};
+
+/**
+ * Set the session id to passed new_session_id
+ * @param {Text} new_session_id
+ */
+koc.setSession = function( new_session ) {
+    if( new_session !== undefined && new_session.length )
+        this.session = new_session;
+};
+
+/**
+ * Get current session id
+ * @return {Text} current session id
+ */
+koc.getSession = function() {
+    return this.session;
+};
 
 koc.getRequestOptions = function(method, page, post_data, xhr) {
     var koc_session = "";
-    if(this.KOC_SESSION_COOKIE !== undefined && this.KOC_SESSION_COOKIE.length>0) {
-        koc_session = " " + KOC_SESSION_COOKIE + "=" + this.KOC_SESSION_COOKIE;
+    if(this.getSession() !== undefined && this.getSession().length>0) {
+        koc_session = " " + KOC_SESSION_COOKIE_NAME + "=" + this.getSession();
     }
     var options = {
         url:   KOC_HOST+'/'+page,
@@ -42,7 +64,6 @@ koc.getRequestOptions = function(method, page, post_data, xhr) {
         followAllRedirects: true
     };
     if( xhr===true ) {
-        console.log("sending an XHR request");
         options.headers["X-Requested-With"] = "XMLHttpRequest";
         options.headers["Accept"] = "application/json, text/javascript, */*";
         options.headers["Origin"] = "http://www.kingsofchaos.com";
@@ -62,6 +83,7 @@ var getErrorMessage = function( html ) {
 };
 
 koc.updateKocSession = function( headers ) {
+    if( headers === undefined || !headers.length ) return;
     var setCookie = headers['set-cookie'];
     var _koc = this;
     if( setCookie !== undefined && setCookie.length>0 ) {
@@ -70,10 +92,8 @@ koc.updateKocSession = function( headers ) {
             var cookieSplit  = cookie.split('=');
             var cookieName   = cookieSplit[0];
             var cookieValue  = cookieSplit[1] || '';
-            if( cookieName == KOC_SESSION_COOKIE ) {
-                console.log("got a new koc_session: " + cookieValue);
-                _koc.KOC_SESSION_COOKIE = cookieValue;
-            }
+            if( cookieName == KOC_SESSION_COOKIE_NAME )
+                _koc.setSession(cookieValue);
         });
     }
 };
@@ -90,21 +110,21 @@ koc.createRequestPromise = function( options, onSuccess ) {
                 success: false,
                 error: "Wrong response from the server",
                 details: "Got status " + response.statusCode,
-                KOC_SESSION_COOKIE: _koc.KOC_SESSION_COOKIE
+                session: _koc.getSession()
             };
         }
         if(response.request.path == "/error.php") {
             return {
                 success: false,
                 error: getErrorMessage( body ),
-                KOC_SESSION_COOKIE: _koc.KOC_SESSION_COOKIE
+                session: _koc.getSession()
             };
         }
         if(response.request.path == "/verify.php") {
             return {
                 success: false,
                 error: "You must verify your account (e-mail) before you can play Kings of Chaos",
-                KOC_SESSION_COOKIE: _koc.KOC_SESSION_COOKIE
+                session: _koc.getSession()
             };
         }
         return onSuccess(response, body);
@@ -114,7 +134,7 @@ koc.createRequestPromise = function( options, onSuccess ) {
             success: false,
             error: "A connection error occurred",
             details: error,
-            KOC_SESSION_COOKIE: _koc.KOC_SESSION_COOKIE
+            session: _koc.getSession()
         };
     });
     return p;
@@ -149,11 +169,9 @@ koc.parseBattlefield = function(html) {
 
 koc.requestPage = function(method, page, post_data, onSuccess, xhr) {
     var _koc = this;
-    console.log("inside requestPage");
     // If no koc_session, need to request one
-    if( _koc.KOC_SESSION_COOKIE === undefined || !_koc.KOC_SESSION_COOKIE.length ) {
+    if( _koc.getSession() === undefined || !_koc.getSession().length ) {
         // Request only headers to get a new koc_session
-        console.log("need a koc_session");
         var p = request(_koc.getRequestOptions("HEAD",""))
         .then( function( result ) {
             var response = result[0];
@@ -174,7 +192,6 @@ koc.requestPage = function(method, page, post_data, onSuccess, xhr) {
 
 koc.login = function(username, password) {
     var _koc = this;
-    console.log("starting login");
     var p = _koc.requestPage("POST", "login.php", {
         'usrname' : username,
         'peeword': password
@@ -182,7 +199,7 @@ koc.login = function(username, password) {
         //TODO: Parse the body (camp)
         return {
             success: true,
-            KOC_SESSION_COOKIE: _koc.KOC_SESSION_COOKIE,
+            session: _koc.getSession(),
             todo: body.substr(0,100)
         };
     });
@@ -263,8 +280,7 @@ koc.register = function(race, username, password, email, challenge, challenge_re
                         'recaptcha_challenge_field': challenge,
                         'recaptcha_response_field' : challenge_response
                     }, function(response, body) {
-                        console.log("great, we almost registered");
-                        //TODO: Send the mail
+                        // Send the mail
                         return _koc.requestPage("POST", "verify.php", {
                             activation_email: email
                         }, function(response, body) {
@@ -272,8 +288,8 @@ koc.register = function(race, username, password, email, challenge, challenge_re
                                 return {
                                     success: true,
                                     message: "Check your e-mails to validate the account",
-                                    KOC_SESSION_COOKIE: _koc.KOC_SESSION_COOKIE
-                                }; 
+                                    session: _koc.getSession()
+                                };
                             }
                             else {
                                 var message = "There was an issue sending the verification mail";
@@ -283,7 +299,7 @@ koc.register = function(race, username, password, email, challenge, challenge_re
                                 return {
                                     success: true,
                                     message: message,
-                                    KOC_SESSION_COOKIE: _koc.KOC_SESSION_COOKIE,
+                                    session: _koc.getSession(),
                                     details: response.request.path
                                 };
                             }
@@ -312,7 +328,8 @@ koc.register = function(race, username, password, email, challenge, challenge_re
 };
 
 koc.verify = function(username, password, password2) {
-    return this.requestPage("POST", "signup.php", {
+    var _koc = this;
+    return _koc.requestPage("POST", "signup.php", {
         username : username,
         password: password,
         password2: password2
@@ -325,7 +342,8 @@ koc.verify = function(username, password, password2) {
             return {
                 success: false,
                 error: "Error parsing response",
-                details: body
+                details: body,
+                session: _koc.getSession()
             };
         }
     }, true );

@@ -40,7 +40,7 @@ describe('Login' , function() {
       return loginPromise.should.be.fulfilled;
     });
     it('should have KOC_SESSION_COOKIE field', function() {
-      return loginPromise.should.eventually.have.property("KOC_SESSION_COOKIE").that.is.not.empty;
+      return loginPromise.should.eventually.have.property("session").that.is.not.empty;
     });
     it('should have success field', function() {
       return loginPromise.should.eventually.have.property("success").that.is.false;
