@@ -10,6 +10,7 @@ var koc = function(session) {
     this.koc_host                = "http://www.kingsofchaos.com";
     this.koc_recaptcha_url       = "http://www.google.com/recaptcha/api/challenge?k=6LcvaQQAAAAAACnjh5psIedbdyYzGDb0COW82ruo";
     this.recaptcha_image_format  = "%simage?c=%s"; // path to the ReCaptcha image from (server, challenge)
+    this.location                = "";
 };
 
 // Helpers (outside the lib)
@@ -183,9 +184,26 @@ koc.prototype.getSession = function() {
     return this.session;
 };
 
+/**
+ * Returns true if there is a session (non empty), false otherwise
+ * @return {Boolean} whether or not there is a session set (non empty)
+ */
 koc.prototype.hasSession = function() {
     var session = this.getSession();
     return session !== undefined && session.length;
+};
+
+/**
+ * Wrapper to prepare a response having all the fields. Especially adds the
+ * session and the last known location.
+ */
+koc.prototype.prepareResponse = function( response ) {
+    // append the session to the response
+    response.session  = this.getSession();
+    response.location = this.location;
+    if( response.error === undefined )
+        response.error = "";
+    return response;
 };
 
 // Web Requests Helpers
@@ -255,46 +273,41 @@ koc.prototype.updateKocSession = function( headers ) {
  */
 koc.prototype.createRequestPromise = function( options, onSuccess ) {
     var _koc = this;
-    // Don't catch verify as error if that's what we asked for!
+    // Don't catch verify as an error if that's what we asked for!
     var catchVerify = options.url.indexOf("verify") == -1 && options.url.indexOf("signup") == -1;
     var p = request(options)
     .then( function(res) {
         var response = res[0];
         var body     = res[1];
         _koc.updateKocSession(response.headers);
+        _koc.location = response.request.path;
         if (response.statusCode != 200) {
-            return {
+            return _koc.prepareResponse({
                 success: false,
-                error: "Wrong response from the server",
+                error: "Wrong response from KoC server",
                 details: "Got status " + response.statusCode,
-                session: _koc.getSession()
-            };
+            });
         }
         if(response.request.path == "/error.php") {
-            return {
+            return _koc.prepareResponse({
                 success: false,
-                error: getErrorMessage( body ),
-                location: "error",
-                session: _koc.getSession()
-            };
+                error: getErrorMessage( body )
+            });
         }
         if(catchVerify && response.request.path == "/verify.php") {
-            return {
+            return _koc.prepareResponse({
                 success: false,
-                error: "You must verify your account (e-mail) before you can play Kings of Chaos",
-                location: "verify",
-                session: _koc.getSession()
-            };
+                error: "You must verify your account (e-mail) before you can play Kings of Chaos"
+            });
         }
         return onSuccess(response, body);
     })
     .fail( function(error) {
-        return {
+        return _koc.prepareResponse({
             success: false,
             error: "A connection error occurred",
-            details: error,
-            session: _koc.getSession()
-        };
+            details: error
+        });
     });
     return p;
 };
@@ -337,21 +350,24 @@ koc.prototype.parseBattlefield = function(html) {
  */
 koc.prototype.requestPage = function(method, page, params, onSuccess, xhr) {
     var _koc = this;
+    _koc.location = "/" + page;
     // If no koc_session, need to request one first
     if( _koc.getSession() === undefined || !_koc.getSession().length ) {
         // Request only headers to get a new koc_session
+        _koc.location = "/";
         var p = request(_koc.getRequestOptions("HEAD",""))
         .then( function( result ) {
             var response = result[0];
             _koc.updateKocSession( response.headers );
+            _koc.location = response.request.path;
             return _koc.createRequestPromise(_koc.getRequestOptions(method, page, params, xhr), onSuccess);
         } )
         .fail( function( error ) {
-            return {
+            return _koc.prepareResponse({
                 success: false,
                 error: "could not get a koc_session",
                 details: error
-            };
+            });
         } );
         return p;
     }
@@ -372,11 +388,10 @@ koc.prototype.login = function(username, password) {
         'usrname' : username,
         'peeword': password
     }, function(response, body) {
-        return {
+        return _koc.prepareResponse({
             success: true,
-            session: _koc.getSession(),
             user: _koc.parseBase(body)
-        };
+        });
     });
     return p;
 };
@@ -390,15 +405,16 @@ koc.prototype.login = function(username, password) {
 koc.prototype.getReCaptchaChallenge = function() {
     // load recaptcha dynamic script
     var _koc = this;
+    _koc.location = "captcha";
     var p = request({url:_koc.getKoCReCaptchaUrl()})
         .then(function(result){
             var response = result[0];
             if (response.statusCode != 200) {
-                return {
+                return _koc.prepareResponse({
                     success: false,
                     error: "Wrong response from the server",
                     details: "Got status " + response.statusCode
-                };
+                });
             }
             var body     = result[1];
             // get the challenge & server
@@ -407,30 +423,30 @@ koc.prototype.getReCaptchaChallenge = function() {
             var mChallenge  = reChallenge.exec(body);
             var mServer     = reServer.exec(body);
             if( mChallenge === null || mServer === null ) {
-                return {
+                return _koc.prepareResponse({
                     success: false,
                     error: "Failed to read challenge or server",
                     details: {
                         challenge: mChallenge,
                         server: mServer
                     }
-                };
+                });
             }
             var server    = mServer[1];
             var challenge = mChallenge[1];
-            return {
+            return _koc.prepareResponse({
                 success: true,
                 image: _koc.getRecaptchaImage(server, challenge),
                 server: server,
                 challenge: challenge
-            };
+            });
         })
         .fail(function(error){
-            return {
+            return _koc.prepareResponse({
                 success: false,
                 error: "Error getting the captcha",
                 details: error
-            };
+            });
         });
     return p;
 };
@@ -448,14 +464,15 @@ koc.prototype.getReCaptchaChallenge = function() {
  *                  .then() and .fail() to catch the promise result
  */
 koc.prototype.register = function(race, username, password, email, challenge, challenge_response) {
+    this.location = "register";
     if(!validateEmail(email)) {
-        return Q({
+        return Q(_koc.prepareResponse({
             success: false,
             error: "Invalid e-mail",
             details: {
                 email: email
             }
-        });
+        }));
     }
     var _koc = this;
     return this.verify(username, password, password).then( function(result) {
@@ -479,44 +496,41 @@ koc.prototype.register = function(race, username, password, email, challenge, ch
                             activation_email: email
                         }, function(response, body) {
                             if( response.request.path == '/verify.php?sent=true') {
-                                return {
+                                return _koc.prepareResponse({
                                     success: true,
-                                    message: "You should receive an e-mail shortly to validate your account",
-                                    session: _koc.getSession()
-                                };
+                                    message: "You should receive an e-mail shortly to validate your account"
+                                });
                             }
                             else {
                                 var message = "Account created but issue sending the verification mail";
                                 if( response.request.path == "/verify.php?invalid=true" ) {
                                     message = "Account created but invalid or already taken e-mail";
                                 }
-                                return {
+                                return _koc.prepareResponse({
                                     success: true,
-                                    message: message,
-                                    session: _koc.getSession(),
-                                    details: response.request.path
-                                };
+                                    message: message
+                                });
                             }
                         });
                     });
                 }
                 else {
-                    return {
+                    return _koc.prepareResponse({
                       success: false,
                       error: "Could not get a turing",
                       details: body
-                    };
+                    });
                 }
-            })
+            });
         }
         else {
             // something's wrong with the validation
             var error = util.format("%s %s", result.username, result.password).trim();
-            return {
+            return _koc.prepareResponse({
                 success: false,
                 error: error,
                 details: result
-            }
+            });
         }
     });
 };
@@ -540,14 +554,13 @@ koc.prototype.verify = function(username, password, password2) {
         try {
             var result = JSON.parse(body);
             result.success = result.username!==undefined&&result.password!==undefined;
-            return result;
+            return _koc.prepareResponse(result);
         } catch(e){
-            return {
+            return _koc.prepareResponse({
                 success: false,
                 error: "Error parsing response",
-                details: body,
-                session: _koc.getSession()
-            };
+                details: body
+            });
         }
     }, true );
 }
@@ -748,20 +761,17 @@ koc.prototype.getUserInfo = function() {
     // we need to be logged in
     var _koc = this;
     if( !this.hasSession() ) {
-        return Q({
+        return Q(_koc.prepareResponse({
             success: false,
             error: "You must set a session id to retrieve the base",
-            session: _koc.getSession(),
             user: {}
-        });
+        }));
     }
     var p = _koc.requestPage("GET", "base.php", null, function(response, body) {
-        return {
+        return _koc.prepareResponse({
             success: true,
-            error: "",
-            session: _koc.getSession(),
             user: _koc.parseBase(body)
-        };
+        });
     });
     return p;
 };
