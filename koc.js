@@ -810,6 +810,7 @@ koc.prototype.parseLeftSideBox = function(html) {
     re.compile(/Gold:[^>]+>\s*([^\n<]+)/gmi);
     m  = re.exec(html);
     result.gold = (m!==null) ? m[1] : "???";
+    result.success = m!==null;
 
     // Experience
     re.compile(/Experience:\s*<[^>]*>\s*<[^>]*>\s*<[^>]*>\s*([^\n<]+)/gmi);
@@ -839,5 +840,73 @@ koc.prototype.parseLeftSideBox = function(html) {
 
     return result;
 };
+
+/**
+ * Get available races information
+ */
+koc.prototype.parseRacesInfo = function(html) {
+    var result = {};
+    if( html === undefined || html === null || !html.length )
+        return result;
+
+    // Background colours
+    var re = /<th\s*class="([^"]+)"\s*style="background-color:\s*([^;]+);\s*border:\s*([^ ]+)\s*[^;]*;">/gmi;
+    var m;
+    var colours = {};
+    while((m=re.exec(html))!==null) {
+        colours[m[1]] = {
+            background: m[2],
+            border         : m[3]
+        };
+    }
+
+    // Colours
+    re.compile(/style="color:([^"]+)" value="Join ([^!]+)!/gmi);
+    while((m=re.exec(html))!==null) {
+        if(colours[m[2]]===undefined)
+            colours[m[2]] = {};
+        colours[m[2]].text = m[1];
+    }
+
+    // Images
+    re.compile(/<td\s*class="([^"]+)"\s*align="[^"]+">\s*<img\s*src="([^"]+)"/gmi);
+    var images = {};
+    while((m=re.exec(html))!==null) {
+        images[m[1]] = this.getKoCHost() + m[2];
+    }
+
+    // Features
+    re.compile(/<td\s*class="([^"]+)"[^>]*>([^:]+):<br \/>\s*<b>([^<]+)<\/b>\s*<br \/>\s*<b>\s*([^<]+)/gmi);
+    var races = [];
+    while((m = re.exec(html))!==null) {
+        races.push({
+            race       : m[1],
+            description: m[2],
+            features: [
+                m[3],
+                m[4]
+            ],
+            image: images[m[1]],
+            colours: colours[m[1]]
+        });
+    }
+    return races;
+};
+
+/**
+ * Get the races information
+ * @return {Object} races information
+ */
+koc.prototype.getRacesInformation = function() {
+    // we need to be logged in
+    var _koc = this;
+    var p = _koc.requestPage("GET", "index.php", null, function(response, body) {
+        return _koc.prepareResponse({
+            success: true,
+            races: _koc.parseRacesInfo(body)
+        });
+    });
+    return p;
+}
 
 module.exports = koc;
