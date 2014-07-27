@@ -11,6 +11,8 @@ var koc = function(session) {
     this.koc_recaptcha_url       = "http://www.google.com/recaptcha/api/challenge?k=6LcvaQQAAAAAACnjh5psIedbdyYzGDb0COW82ruo";
     this.recaptcha_image_format  = "%simage?c=%s"; // path to the ReCaptcha image from (server, challenge)
     this.location                = "";
+    this.stats                   = {};
+    this.username                = "???";
 };
 
 // Helpers (outside the lib)
@@ -24,19 +26,6 @@ var koc = function(session) {
 var validateEmail = function(email) {
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
-};
-
-/**
- * Parse and return the turing from given HTML content
- * @param {Text} HTML content to be parsed
- * @return {Text} Turing, if found, empty if not
- */
-var getTuring = function(html) {
-    var re = /name="turing"\s*value="([^"]+)">/gmi;
-    var m  = re.exec(html);
-    if(m!==null)
-        return m[1];
-    return "";
 };
 
 /**
@@ -201,9 +190,29 @@ koc.prototype.prepareResponse = function( response ) {
     // append the session to the response
     response.session  = this.getSession();
     response.location = this.location;
+    response.stats    = this.stats;
+    // The verify and error pages notably doesn't show the username and fortification in the title
+    // Check and get it from the last known username instead
+    if( this.stats.username !== undefined && this.stats.username.indexOf(" ")>=0 )
+        this.stats.username = this.username;
+    if( this.stats.fortification !== undefined && this.stats.fortification.indexOf(",")>=0 )
+        this.stats.fortification = "???";
     if( response.error === undefined )
         response.error = "";
     return response;
+};
+
+/**
+ * Parse and return the turing from given HTML content
+ * @param {Text} HTML content to be parsed
+ * @return {Text} Turing, if found, empty if not
+ */
+koc.prototype.getTuring = function(html) {
+    var re = /name="turing"\s*value="([^"]+)">/gmi;
+    var m  = re.exec(html);
+    if(m!==null)
+        return m[1];
+    return "";
 };
 
 // Web Requests Helpers
@@ -281,6 +290,7 @@ koc.prototype.createRequestPromise = function( options, onSuccess ) {
         var body     = res[1];
         _koc.updateKocSession(response.headers);
         _koc.location = response.request.path;
+        _koc.stats = _koc.parseLeftSideBox(body);
         if (response.statusCode != 200) {
             return _koc.prepareResponse({
                 success: false,
@@ -351,6 +361,8 @@ koc.prototype.parseBattlefield = function(html) {
 koc.prototype.requestPage = function(method, page, params, onSuccess, xhr) {
     var _koc = this;
     _koc.location = "/" + page;
+    if(params !== undefined && params !== null && params.usrname !== undefined)
+        _koc.username = params.usrname;
     // If no koc_session, need to request one first
     if( _koc.getSession() === undefined || !_koc.getSession().length ) {
         // Request only headers to get a new koc_session
@@ -480,7 +492,7 @@ koc.prototype.register = function(race, username, password, email, challenge, ch
             // we need a turing
             return _koc.requestPage("GET", "index.php", null, function(response, body) {
                 // get the turing
-                var turing = getTuring(body);
+                var turing = _koc.getTuring(body);
                 if( turing.length) {
                     return _koc.requestPage("POST", "signup.php", {
                         'race'      : race,
@@ -699,6 +711,7 @@ koc.prototype.parseBase = function(baseHtml) {
     		Value2:'([^<]+)<a([^>]+)>([^<]+)<\\/a>([^<]+)'
     	}]), 'gm');
     	var matchesPersonnel = rePersonnel.exec(baseHtml);
+    	this.username = matches[2];
     	return {
     	    success: true,
     		userInfo: {
@@ -774,6 +787,57 @@ koc.prototype.getUserInfo = function() {
         });
     });
     return p;
+};
+
+/**
+ * Parse the box on the left-side of each page with the stats
+ * @param {Text} html the HTML content of the page to parse
+ * @return {Object} an object containing gold, experience, turns, rank,
+ *                  lastAttacked, mails and newMails if found
+ */
+koc.prototype.parseLeftSideBox = function(html) {
+    var result = {};
+    if( html === undefined || html === null || !html.length )
+        return result;
+
+    // Username and Fortification
+    var re = /<title>Kings\s*of\s*Chaos\s*::\s*([^'<,]+)[^ ]*\s*([^<]+)/gmi;
+    var m  = re.exec(html);
+    result.username      = (m!==null) ? m[1] : "???";
+    result.fortification = (m!==null) ? m[2] : "???";
+
+    // Gold
+    re.compile(/Gold:[^>]+>\s*([^\n<]+)/gmi);
+    m  = re.exec(html);
+    result.gold = (m!==null) ? m[1] : "???";
+
+    // Experience
+    re.compile(/Experience:\s*<[^>]*>\s*<[^>]*>\s*<[^>]*>\s*([^\n<]+)/gmi);
+    m = re.exec(html);
+    result.experience = (m!==null) ? m[1] : "???";
+
+    // Turns
+    re.compile(/Turns:\s*<[^>]*>\s*<[^>]*>\s*<[^>]*>\s*([^\n<]+)/gmi);
+    m = re.exec(html);
+    result.turns = (m!==null) ? m[1] : "???";
+
+    // Rank
+    re.compile(/Rank:\s*<[^>]*>\s*<[^>]*>\s*<[^>]*>\s*([^\n<]+)/gmi);
+    m = re.exec(html);
+    result.rank = (m!==null) ? m[1] : "???";
+
+    // Last Attacked
+    re.compile(/Last Attacked:\s*<[^>]+>\s*<[^>]+>([^\n<]+)/gmi);
+    m = re.exec(html);
+    result.lastAttacked = (m!==null) ? m[1] : "???";
+
+    // Mails
+    re.compile(/Mail:\s*<a\s*href="[^"]*"\s*style="font-size:\s*[^;]*;\s*color:\s*([^;]+);">([^\n<]+)/gmi);
+    m = re.exec(html);
+    result.mails    = (m!==null)                ? m[2] : "???";
+    result.newMails = (m!==null && m[1]=="RED") ? true : false;
+
+    return result;
 };
 
 module.exports = koc;

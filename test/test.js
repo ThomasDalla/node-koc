@@ -11,7 +11,7 @@ describe('Parse Battlefield' , function() {
     'test/html/battlefield_full_logged-out.html',
     'test/html/battlefield_xhr_logged-out.html',
     'test/html/battlefield_xhr_logged-in.html',
-    'test/html/battlefield_full_first-login.html',
+    'test/html/battlefield_full_first-login.html'
   ];
   for(var iHtml in htmlPaths) {
     var htmlPath = htmlPaths[iHtml];
@@ -140,7 +140,7 @@ describe('Parse Base' , function() {
         var fieldValue = result[field];
         subfields.forEach(function(subfield){
           it( "Field '" + field + "' should have property '" + subfield + "' that is not empty", function() {
-            return fieldValue.should.have.property( subfield ).that.deep.is.not.empty;
+            return fieldValue.should.have.property( subfield ).that.is.not.empty;
           });
         });
       });
@@ -151,7 +151,7 @@ describe('Parse Base' , function() {
       previousLogins.forEach( function(previousLogin) {
         ['ip','date','success'].forEach(function(previousLoginField) {
           it( "A previous login should have '" + previousLoginField + "' that is not empty", function() {
-            return previousLogin.should.have.property( previousLoginField ).that.deep.is.not.empty;
+            return previousLogin.should.have.property( previousLoginField ).that.is.not.empty;
           });
         });
       });
@@ -191,3 +191,43 @@ describe('Parse Base' , function() {
     });
   });
 } );
+
+describe('Parse Left-Side Box' , function() {
+  var htmlPaths = [
+    // page                                        , has the box
+    [ 'test/html/base_first-login.html'            , true  ],
+    [ 'test/html/base_01.html'                     , true  ],
+    [ 'test/html/base_mails_read.html'             , true  ],
+    [ 'test/html/battlefield_full_logged-out.html' , false ],
+    [ 'test/html/battlefield_xhr_logged-out.html'  , false ],
+    [ 'test/html/battlefield_xhr_logged-in.html'   , false ],
+    [ 'test/html/battlefield_full_first-login.html', true  ],
+    [ 'test/html/home.html'                        , false ],
+    [ 'test/html/verify.html'                      , true  ]
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath = page[0];
+    var hasBox   = page[1];
+    describe('#local ' + htmlPath, function() {
+      var html     = fs.readFileSync(htmlPath, 'utf8');
+      var result   = koc.parseLeftSideBox(html);
+      //console.log(result);
+      it('should be an object', function() {
+        return result.should.be.an.object;
+      });
+      ['username', 'fortification', 'gold', 'experience', 'turns', 'rank',
+       'lastAttacked', 'mails' ].forEach( function(field) {
+         it( "should have property '" + field + "'", function() {
+           return result.should.have.property(field).that.is.not.empty;
+         } );
+         if(hasBox)
+           it( "property '" + field + "' should not be ???", function() {
+             return result.should.have.property(field).that.is.not.equal("???");
+           } );
+       });
+       it( "should have property 'newMails' which is a boolean", function() {
+         return result.should.have.property("newMails").that.is.a.boolean;
+       } );
+    });
+  });
+});
