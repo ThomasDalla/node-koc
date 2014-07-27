@@ -25,14 +25,24 @@ var validateEmail = function(email) {
     return re.test(email);
 };
 
+/**
+ * Parse and return the turing from given HTML content
+ * @param {Text} HTML content to be parsed
+ * @return {Text} Turing, if found, empty if not
+ */
 var getTuring = function(html) {
     var re = /name="turing"\s*value="([^"]+)">/gmi;
     var m  = re.exec(html);
     if(m!==null)
         return m[1];
-    return html;
+    return "";
 };
 
+/**
+ * Get the error message from a KoC error.php page
+ * @param {Text} the HTML page to parse the error from
+ * @return {Text} the error message, if found, "Unknown Error" if not
+ */
 var getErrorMessage = function( html ) {
     var re = /<h3>Error<\/h3>([^<]+)</gmi;
     var m  = re.exec( html );
@@ -40,6 +50,36 @@ var getErrorMessage = function( html ) {
         return m[1].trim();
     }
     return "Unknown Error";
+};
+
+var createTrRegExp = function(header, content) {
+	return "<tr>\\s*<td>\\s*<b>" + header + "<\\/b>\\s*<\\/td>\\s*<td>\\s*" + content + "\\s*<\\/td>\\s*<\\/tr>";
+};
+
+var createTrTripleTdRegExp = function(header, content1, content2) {
+	return "<tr>\\s*<td([^<]*)>\\s*" + header + "\\s*<\\/td>\\s*<td([^<]*)>\\s*" + content1 + "\\s*<\\/td>\\s*<td([^<]*)>\\s*" + content2 + "\\s*<\\/td>\\s*<\\/tr>";
+};
+
+var createTableRegExp = function(keyPairValues) {
+	var l = keyPairValues.length;
+	var keyPairValuesRegExp = [];
+	for (var i=0; i<l; i++) {
+		keyPairValuesRegExp[i] = createTrRegExp(keyPairValues[i].Key, keyPairValues[i].Value);
+	}
+	return keyPairValuesRegExp.join("\\s*");
+};
+
+var createTableTripleTdRegExp = function(keyPairValues) {
+	var l = keyPairValues.length;
+	var keyPairValuesRegExp = [];
+	for (var i=0; i<l; i++) {
+		keyPairValuesRegExp[i] = createTrTripleTdRegExp(keyPairValues[i].Key, keyPairValues[i].Value1, keyPairValues[i].Value2);
+	}
+	return keyPairValuesRegExp.join("\\s*");
+};
+
+var stripHtml = function(html) {
+   return html.replace(/<(?:.|\n)*?>/gm, '');
 };
 
 // Our lib
@@ -141,6 +181,11 @@ koc.prototype.setSession = function( new_session ) {
  */
 koc.prototype.getSession = function() {
     return this.session;
+};
+
+koc.prototype.hasSession = function() {
+    var session = this.getSession();
+    return session !== undefined && session.length;
 };
 
 // Web Requests Helpers
@@ -327,11 +372,10 @@ koc.prototype.login = function(username, password) {
         'usrname' : username,
         'peeword': password
     }, function(response, body) {
-        //TODO: Parse the body (camp)
         return {
             success: true,
             session: _koc.getSession(),
-            todo: body.substr(0,100)
+            user: _koc.parseBase(body)
         };
     });
     return p;
@@ -507,5 +551,219 @@ koc.prototype.verify = function(username, password, password2) {
         }
     }, true );
 }
+
+/**
+ * Get user info from the base HTML page
+ * @param {Text} baseHtml HTML content of the Base page
+ * @return {Object} an object containing user information
+ */
+koc.prototype.parseBase = function(baseHtml) {
+	//var re=/<tr>\s*<td>\s*<b>Name<\/b>\s*<\/td>\s*<td>\s*<a href="stats\.php\?id=([0-9]+)">([^<]+)<\/a>\s*<\/td>\s*<\/tr>/mg;
+	//var re = new RegExp(createTrRegExp("Name", '<a href="stats\\.php\\?id=([0-9]+)">([^<]+)<\\/a>'), 'gm');
+	try {
+    	var reUserInfo = new RegExp(createTableRegExp([
+    	{
+    		Key: "Name",
+    		Value:'<a href="stats\\.php\\?id=([0-9]+)">([^<]+)<\\/a>' // 1, 2
+    	},{
+    		Key: "Race",
+    		Value:'([^<]+)' // 3
+    	},{
+    		Key: "Rank",
+    		Value:'([^<]+)' // 4
+    	},{
+    		Key: "Highest Rank",
+    		Value:'([^<]+)' // 5
+    	},{
+    		Key: "Commander",
+    		Value:'([^<]+)' // 5
+    	}]), 'gm');
+    	var matches = reUserInfo.exec(baseHtml);
+    	var reMilitary = new RegExp(createTableRegExp([
+    	{
+    		Key: "Fortification",
+    		Value:'([^<]+)' // 1
+    	},{
+    		Key: "Siege Technology",
+    		Value:'([^<]+)' // 2
+    	},{
+    		Key: "Economy",
+    		Value:'([^<]+)' // 3
+    	},{
+    		Key: "Technology",
+    		Value:'([^<]+)' // 4
+    	},{
+    		Key: "Conscription",
+    		Value:'([^<]+)' // 5
+    	},{
+    		Key: "Available Funds",
+    		Value:'([^<]+)' // 6
+    	},{
+    		Key: "Projected Income",
+    		Value:'([^<]+)' // 7
+    	},{
+    		Key: "Game Turns",
+    		Value:'([^<]+)' // 8
+    	},{
+    		Key: "Covert Level",
+    		Value:'([^<]+)' // 9
+    	}]), 'gm');
+    	var matchesMilitary = reMilitary.exec(baseHtml);
+    	var reMilitaryEffectiveness = new RegExp(createTableTripleTdRegExp([
+    	{
+    		Key: "<b>Strike Action<\\/b>",
+    		Value1:'([^<]+)', // 3
+    		Value2:'([^<]+)' // 5
+    	},{
+    		Key: "<b>Defensive Action<\\/b>",
+    		Value1:'([^<]+)', // 8
+    		Value2:'([^<]+)' // 10
+    	},{
+    		Key: "<b>Spy Rating<\\/b>",
+    		Value1:'([^<]+)', // 13
+    		Value2:'([^<]+)' // 15
+    	},{
+    		Key: "<b>Sentry Rating<\\/b>",
+    		Value1:'([^<]+)', // 18
+    		Value2:'([^<]+)' // 20
+    	}]), 'gm');
+    	var matchesMilitaryEffectiveness = reMilitaryEffectiveness.exec(baseHtml);
+    	var rePreviousLogins = new RegExp(createTableTripleTdRegExp([
+    	{
+    		Key: "([0-9.]+)", // 2
+    		Value1:'([^<]+)', // 4
+    		Value2:'([^<]+)' // 6
+    	}]), 'gm');
+    	var previousLogins = [];
+    	var matchesPreviousLogins;
+    	while ((matchesPreviousLogins = rePreviousLogins.exec(baseHtml)) !== null) {
+    		previousLogins.push({
+    			ip: matchesPreviousLogins[2],
+    			date: matchesPreviousLogins[4],
+    			success: matchesPreviousLogins[6]
+    		});
+    	}
+    	var rePersonnel = new RegExp(createTableTripleTdRegExp([
+    	{
+    		Key: "<b>Trained Attack Soldiers<\\/b>",
+    		Value1:'([^<]+)', // 3
+    		Value2:'([^<]+)<a([^>]+)>([^<]+)<\\/a>([^<]+)'
+    	},{
+    		Key: "<b>Trained Attack Mercenaries<\\/b>",
+    		Value1:'([^<]+)', // 11
+    		Value2:'([^<]+)<a([^>]+)>([^<]+)<\\/a>([^<]+)'
+    	},{
+    		Key: "<b>Trained Defense Soldiers<\\/b>",
+    		Value1:'([^<]+)', // 19
+    		Value2:'([^<]+)<a([^>]+)>([^<]+)<\\/a>([^<]+)'
+    	},{
+    		Key: "<b>Trained Defense Mercenaries<\\/b>",
+    		Value1:'([^<]+)', // 27
+    		Value2:'([^<]+)<a([^>]+)>([^<]+)<\\/a>([^<]+)'
+    	},{
+    		Key: "<b>Untrained Soldiers<\\/b>",
+    		Value1:'([^<]+)', // 35
+    		Value2:'([^<]+)<a([^>]+)>([^<]+)<\\/a>([^<]+)'
+    	},{
+    		Key: "<b>Untrained Mercenaries<\\/b>",
+    		Value1:'([^<]+)', // 43
+    		Value2:'([^<]+)<a([^>]+)>([^<]+)<\\/a>([^<]+)'
+    	},{
+    		Key: "<b>Spies<\\/b>",
+    		Value1:'([^<]+)', // 51
+    		Value2:'([^<]+)<a([^>]+)>([^<]+)<\\/a>([^<]+)'
+    	},{
+    		Key: "<b>Sentries<\\/b>",
+    		Value1:'([^<]+)', // 59
+    		Value2:'([^<]+)<a([^>]+)>([^<]+)<\\/a>([^<]+)'
+    	},{
+    		Key: "<b>Army Morale<\\/b>",
+    		Value1:'([^<]+)', // 67
+    		Value2:'([^<]+)<a([^>]+)>([^<]+)<\\/a>([^<]+)'
+    	},{
+    		Key: "<b>Total Fighting Force<\\/b>",
+    		Value1:'([^<]+)', // 75
+    		Value2:'([^<]+)<a([^>]+)>([^<]+)<\\/a>([^<]+)'
+    	}]), 'gm');
+    	var matchesPersonnel = rePersonnel.exec(baseHtml);
+    	return {
+    	    success: true,
+    		userInfo: {
+    			userid: matches[1],
+    			username: matches[2],
+    			race: matches[3].trim(),
+    			rank: matches[4],
+    			highestRank: matches[5],
+    			commander: stripHtml(matches[6])
+    		},
+    		militaryOverview: {
+    			fortification: matchesMilitary[1],
+    			siegeTechnology: matchesMilitary[2],
+    			economy: matchesMilitary[3],
+    			technology: matchesMilitary[4],
+    			conscription: matchesMilitary[5],
+    			availableFunds: matchesMilitary[6],
+    			projectedIncome: matchesMilitary[7],
+    			gameTurns: matchesMilitary[8].trim().split('/')[0].trim(),
+    			covertLevel: matchesMilitary[9]
+    		},
+    		militaryEffectiveness: {
+    			strikeAction : matchesMilitaryEffectiveness[3],
+    			strikeActionRank : matchesMilitaryEffectiveness[5].replace(/Ranked #/gm,''),
+    			defensiveAction : matchesMilitaryEffectiveness[8],
+    			defensiveActionRank : matchesMilitaryEffectiveness[10].replace(/Ranked #/gm,''),
+    			spyRating : matchesMilitaryEffectiveness[13],
+    			spyRatingRank : matchesMilitaryEffectiveness[15].replace(/Ranked #/gm,''),
+    			sentryRating : matchesMilitaryEffectiveness[18],
+    			sentryRatingRank : matchesMilitaryEffectiveness[20].replace(/Ranked #/gm,'')
+    		},
+    		personnel: {
+    			trainedAttackSoldiers: matchesPersonnel[3],
+    			trainedAttackMercenaries: matchesPersonnel[11],
+    			trainedDefenseSoldiers: matchesPersonnel[19],
+    			trainedDefenseMercenaries: matchesPersonnel[27],
+    			untrainedSoliders: matchesPersonnel[35],
+    			untrainedMercenaries: matchesPersonnel[43],
+    			spies: matchesPersonnel[51],
+    			sentries: matchesPersonnel[59],
+    			armyMorale: matchesPersonnel[67],
+    			totalFightingForce: matchesPersonnel[75]
+    		},
+    		previousLogins: previousLogins
+    	};
+	}
+	catch(e) {
+	    return {
+	        success: false,
+	        error: "An error occurred parsing the base: " + e.toString()
+	    };
+	}
+};
+
+/**
+ * Get user info. You need to be logged in and have a session already.
+ * @return {Object} Return an object with 'success', 'error', 'session' and 'user'
+ */
+koc.prototype.getUserInfo = function() {
+    // we need to be logged in
+    var _koc = this;
+    if( !this.hasSession() ) {
+        return Q({
+            success: false,
+            error: "You must set a session id to retrieve the base",
+            session: _koc.getSession(),
+            user: {}
+        });
+    }
+    var p = _koc.requestPage("GET", "base.php", null, function(response, body) {
+        return {
+            success: true,
+            error: "",
+            session: _koc.getSession(),
+            user: _koc.parseBase(body)
+        };
+    });
+    return p;
+};
 
 module.exports = koc;
