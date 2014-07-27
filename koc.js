@@ -3,26 +3,26 @@ var Q       = require('q');
 var request = Q.denodeify(require('request'));
 var util    = require("util");
 
-// Constants
-const KOC_SESSION_COOKIE_NAME = "koc_session";
-const KOC_HOST                = "http://www.kingsofchaos.com";
-const KOC_RECAPTCHA_URL       = "http://www.google.com/recaptcha/api/challenge?k=6LcvaQQAAAAAACnjh5psIedbdyYzGDb0COW82ruo";
-const RECAPTCHA_IMAGE         = "%simage?c=%s"; // path to the ReCaptcha image from (server, challenge)
-
 // Our Lib
 var koc = function(session) {
-    this.session = session;
+    this.session                 = session;
+    this.koc_session_cookie_name = "koc_session";
+    this.koc_host                = "http://www.kingsofchaos.com";
+    this.koc_recaptcha_url       = "http://www.google.com/recaptcha/api/challenge?k=6LcvaQQAAAAAACnjh5psIedbdyYzGDb0COW82ruo";
+    this.recaptcha_image_format  = "%simage?c=%s"; // path to the ReCaptcha image from (server, challenge)
 };
 
 // Helpers (outside the lib)
+// =============================================================================
 
+/**
+ * Simple e-mail validation with RegEx
+ * @param {Text} email E-Mail address to validate
+ * @return {Boolean} whether or not this is a valid e-mail address
+ */
 var validateEmail = function(email) {
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
-};
-
-var getRecaptchaImage = function(server, challenge) {
-    return util.format(RECAPTCHA_IMAGE, server, challenge);
 };
 
 var getTuring = function(html) {
@@ -43,10 +43,92 @@ var getErrorMessage = function( html ) {
 };
 
 // Our lib
+// =============================================================================
+
+// Getters / Setters
+// -----------------------------------------------------------------------------
+
+/**
+ * Set the name of the cookie that KoC uses to store the session id
+ * @param {Text} new cookie name
+ */
+koc.prototype.setKoCSessionCookieName = function( new_cookie_name ) {
+    if( new_cookie_name !== undefined && new_cookie_name.length )
+        this.koc_session_cookie_name = new_cookie_name;
+};
+
+/**
+ * Get the name of the cookie that KoC uses to store the session id
+ * @return {Text} the cookie name
+ */
+koc.prototype.getKoCSessionCookieName = function() {
+    return this.koc_session_cookie_name;
+};
+
+/**
+ * Set the base URL of KoC website
+ * @param {Text} new KoC URL
+ */
+koc.prototype.setKoCHost = function( new_koc_host ) {
+    if( new_koc_host !== undefined && new_koc_host.length )
+        this.koc_host = new_koc_host;
+};
+
+/**
+ * Get the base URL of KoC website
+ * @return {Text} KoC URL
+ */
+koc.prototype.getKoCHost = function() {
+    return this.koc_host;
+};
+
+/**
+ * Set the URL of the Javascript to get a new challenge for KoC
+ * @param {Text} new captcha url
+ */
+koc.prototype.setKoCReCaptchaUrl = function( new_koc_recaptcha_url ) {
+    if( new_koc_recaptcha_url !== undefined && new_koc_recaptcha_url.length )
+        this.koc_recaptcha_url = new_koc_recaptcha_url;
+};
+
+/**
+ * Get the URL of the Javascript to get a new challenge for KoC
+ * @return {Text} captcha url
+ */
+koc.prototype.getKoCReCaptchaUrl = function() {
+    return this.koc_recaptcha_url;
+};
+
+/**
+ * Get a link to a ReCaptcha image given the server and the challenge
+ * @param {Text} server ReCaptcha Server
+ * @param {Text} challenge ReCaptcha challenge
+ * @return {Text} URL to the ReCaptcha image
+ */
+koc.prototype.getRecaptchaImage = function(server, challenge) {
+    return util.format(this.getReCaptchaImageFormat(), server, challenge);
+};
+
+/**
+ * Set the format of the URL to get the recaptcha image from (server, challenge)
+ * @param {Text} new URL format
+ */
+koc.prototype.setReCaptchaImageFormat = function( new_recaptcha_image_format ) {
+    if( new_recaptcha_image_format !== undefined && new_recaptcha_image_format.length )
+        this.recaptcha_image_format = new_recaptcha_image_format;
+};
+
+/**
+ * Get the format of the URL to get the recaptcha image from (server, challenge)
+ * @return {Text} URL format
+ */
+koc.prototype.getReCaptchaImageFormat = function() {
+    return this.recaptcha_image_format;
+};
 
 /**
  * Set the session id to passed new_session_id
- * @param {Text} new_session_id
+ * @param {Text} new session id to set
  */
 koc.prototype.setSession = function( new_session ) {
     if( new_session !== undefined && new_session.length )
@@ -61,18 +143,29 @@ koc.prototype.getSession = function() {
     return this.session;
 };
 
-koc.prototype.getRequestOptions = function(method, page, post_data, xhr) {
+// Web Requests Helpers
+// -----------------------------------------------------------------------------
+
+/**
+ * Get request options that we can pass to node request
+ * @param {Text} method HTTP method to use (GET, POST, HEAD)
+ * @param {Text} page KoC page to request (login.php, battlefield.php, etc...)
+ * @param {Object} params Parameters for GET and POST requests
+ * @param {Boolean} xhr Whether or not request through XHR (Ajax)
+ * @return {Object} the options to pass to node request
+ */
+koc.prototype.getRequestOptions = function(method, page, params, xhr) {
     var koc_session = "";
     if(this.getSession() !== undefined && this.getSession().length>0) {
-        koc_session = " " + KOC_SESSION_COOKIE_NAME + "=" + this.getSession();
+        koc_session = " " + this.getKoCSessionCookieName() + "=" + this.getSession();
     }
     var options = {
-        url:   KOC_HOST+'/'+page,
+        url:   this.getKoCHost()+'/'+page,
         method: method,
         headers: {
             'Cookie': "country=XO;" + koc_session,
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36',
-            'Referer' : KOC_HOST + '/'
+            'User-Agent': 'Node-KoC', //'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36',
+            'Referer' : this.getKoCHost() + '/'
         },
         followAllRedirects: true
     };
@@ -81,11 +174,18 @@ koc.prototype.getRequestOptions = function(method, page, post_data, xhr) {
         options.headers["Accept"] = "application/json, text/javascript, */*";
         options.headers["Origin"] = "http://www.kingsofchaos.com";
     }
-    if(post_data!==undefined && post_data!==null)
-        options.form = post_data;
+    if(params!==undefined && params!==null)
+        if(method=="GET")
+            options.qs   = params;
+        else
+            options.form = params;
     return options;
 };
 
+/**
+ * Update the value of KoC session id, if requeted by KoC server
+ * @param {Object} headers The headers received from the server
+ */
 koc.prototype.updateKocSession = function( headers ) {
     if( headers === undefined ) return;
     var setCookie = headers['set-cookie'];
@@ -96,12 +196,18 @@ koc.prototype.updateKocSession = function( headers ) {
             var cookieSplit  = cookie.split('=');
             var cookieName   = cookieSplit[0];
             var cookieValue  = cookieSplit[1] || '';
-            if( cookieName == KOC_SESSION_COOKIE_NAME )
+            if( cookieName == _koc.getKoCSessionCookieName() )
                 _koc.setSession(cookieValue);
         });
     }
 };
 
+/**
+ * Given express options, create and return a request promise to KoC server
+ * @param {Object} options The options to send to request
+ * @param {function} onSuccess Callback to call on success
+ * @return {Object} the HTTP request promise (use .then() and .fail() on it)
+ */
 koc.prototype.createRequestPromise = function( options, onSuccess ) {
     var _koc = this;
     // Don't catch verify as error if that's what we asked for!
@@ -149,9 +255,9 @@ koc.prototype.createRequestPromise = function( options, onSuccess ) {
 };
 
 /**
- * Parses a battlefield page in HTML format and returns a clean JS Object version
- * @param {Text} html
- * @return {Object} players
+ * Parses a battlefield page in HTML format and returns an array of players
+ * @param {Text} html the content of the HTML page to parse
+ * @return {Array} an array of the players information found on that page
  */
 koc.prototype.parseBattlefield = function(html) {
     var re = /<a href="alliances\.php\?id=([^"]*)">[^<]*<\/a><\/td>\s*<td><a class="player" href="\/stats\.php\?id=([0-9]+)"\s*>([^<]+)<\/a><\/td>[^>]*>([0-9,]+)<\/td>[^>]*>\s*([A-Za-z0-9-_]+)\s*<\/td>[^>]*>([^G]+)Gold<\/td>[^>]*>([^<]+)<\/td>/gmi;
@@ -175,16 +281,25 @@ koc.prototype.parseBattlefield = function(html) {
     return players;
 };
 
-koc.prototype.requestPage = function(method, page, post_data, onSuccess, xhr) {
+/**
+ * Create a request to KoC website and return a node request promise
+ * @param {Text} method HTTP method to use (GET, POST, HEAD)
+ * @param {Text} page KoC page to request (login.php, battlefield.php, etc...)
+ * @param {Object} params Parameters for GET and POST requests
+ * @param {function} onSuccess Callback to call on success
+ * @param {Boolean} xhr Whether or not request through XHR (Ajax)
+ * @return {Object} the HTTP request promise (use .then() and .fail() on it)
+ */
+koc.prototype.requestPage = function(method, page, params, onSuccess, xhr) {
     var _koc = this;
-    // If no koc_session, need to request one
+    // If no koc_session, need to request one first
     if( _koc.getSession() === undefined || !_koc.getSession().length ) {
         // Request only headers to get a new koc_session
         var p = request(_koc.getRequestOptions("HEAD",""))
         .then( function( result ) {
             var response = result[0];
             _koc.updateKocSession( response.headers );
-            return _koc.createRequestPromise(_koc.getRequestOptions(method, page, post_data, xhr), onSuccess);
+            return _koc.createRequestPromise(_koc.getRequestOptions(method, page, params, xhr), onSuccess);
         } )
         .fail( function( error ) {
             return {
@@ -195,9 +310,17 @@ koc.prototype.requestPage = function(method, page, post_data, onSuccess, xhr) {
         } );
         return p;
     }
-    return _koc.createRequestPromise(_koc.getRequestOptions(method, page, post_data, xhr), onSuccess);
+    return _koc.createRequestPromise(_koc.getRequestOptions(method, page, params, xhr), onSuccess);
 };
 
+/**
+ * Login to KoC
+ * @param {Text} username
+ * @param {Text} password
+ * @return {Object} Promise of the HTTP request which should return an object
+ *                  containing "success" and "session" fields at least. Use
+ *                  .then() and .fail() to catch the promise result
+ */
 koc.prototype.login = function(username, password) {
     var _koc = this;
     var p = _koc.requestPage("POST", "login.php", {
@@ -214,9 +337,16 @@ koc.prototype.login = function(username, password) {
     return p;
 };
 
-koc.prototype.getLoginCaptcha = function() {
+/**
+ * Get a new ReCaptcha challenge for KoC
+ * @return {Object} Promise of the HTTP request which should return an object
+ *                  containing "success" and "session" fields at least. Use
+ *                  .then() and .fail() to catch the promise result
+ */
+koc.prototype.getReCaptchaChallenge = function() {
     // load recaptcha dynamic script
-    var p = request({url:KOC_RECAPTCHA_URL})
+    var _koc = this;
+    var p = request({url:_koc.getKoCReCaptchaUrl()})
         .then(function(result){
             var response = result[0];
             if (response.statusCode != 200) {
@@ -246,7 +376,7 @@ koc.prototype.getLoginCaptcha = function() {
             var challenge = mChallenge[1];
             return {
                 success: true,
-                image: getRecaptchaImage(server, challenge),
+                image: _koc.getRecaptchaImage(server, challenge),
                 server: server,
                 challenge: challenge
             };
@@ -261,6 +391,18 @@ koc.prototype.getLoginCaptcha = function() {
     return p;
 };
 
+/**
+ * Register a new user to KoC
+ * @param {Text} race Humans, Dwarves, Elves, Undead, Orcs
+ * @param {Text} username
+ * @param {Text} password
+ * @param {Text} email
+ * @param {Text} challenge
+ * @param {Text} challenge_response
+ * @return {Object} Promise of the HTTP request which should return an object
+ *                  containing "success" and "session" fields at least. Use
+ *                  .then() and .fail() to catch the promise result
+ */
 koc.prototype.register = function(race, username, password, email, challenge, challenge_response) {
     if(!validateEmail(email)) {
         return Q({
@@ -335,6 +477,15 @@ koc.prototype.register = function(race, username, password, email, challenge, ch
     });
 };
 
+/**
+ * Verify if the provided username and passwords are valid
+ * @param {Text} username
+ * @param {Text} password
+ * @param {Text} password2 when asked to enter twice the password
+ * @return {Object} Promise of the HTTP request which should return an object
+ *                  containing "success" and "session" fields at least. Use
+ *                  .then() and .fail() to catch the promise result
+ */
 koc.prototype.verify = function(username, password, password2) {
     var _koc = this;
     return _koc.requestPage("POST", "signup.php", {

@@ -54,7 +54,7 @@ describe('Login' , function() {
 
 describe('ReCaptcha Image', function() {
   describe('#get image', function() {
-    var imagePromise = koc.getLoginCaptcha();
+    var imagePromise = koc.getReCaptchaChallenge();
     it('should be fulfilled', function() {
       return imagePromise.should.be.fulfilled;
     });
