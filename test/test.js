@@ -231,3 +231,31 @@ describe('Parse Left-Side Box' , function() {
     });
   });
 });
+
+describe('Parse the Races Information', function() {
+  describe( "#remote", function() {
+    var basePromise = koc.getRacesInformation();
+    it('should be fulfilled', function() {
+      return basePromise.should.be.fulfilled;
+    });
+    it('should have success field that is true', function() {
+      return basePromise.should.eventually.have.property("success").that.is.true;
+    });
+    it('should have races field that is an array of 5 items and features should be an array', function() {
+      return basePromise.should.eventually.have.property("races")
+            .that.is.an('array')
+            .that.has.length(5)
+            .that.has.deep.property('[0]')
+              .that.contain.keys('race','description','features','image','colours')
+              .that.has.property('features').that.is.an('array');
+    });
+    it('should have races field that is an array of 5 items an colours should be an object', function() {
+      return basePromise.should.eventually.have.property("races")
+            .that.is.an('array')
+            .that.has.length(5)
+            .that.has.deep.property('[0]')
+              .that.contain.keys('race','description','features','image','colours')
+              .that.has.property('colours').that.is.an('object').that.contain.keys('background','border','text');
+    });
+  });
+});
