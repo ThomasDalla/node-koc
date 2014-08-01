@@ -312,3 +312,54 @@ describe('Parse New User Advisor' , function() {
     });
   });
 });
+
+describe('Parse Error' , function() {
+  var htmlPaths = [
+    // page                              , expected to be
+    [ 'test/html/error_please-login.html', 'Please login to view that page.'                           　　　　　　　　　　],
+    [ 'test/html/error_cookies.html'     , 'An unknown error has occurred. Please check to make sure cookies are enabled.' ],
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath = page[0];
+    var expected = page[1];
+    describe('#local ' + htmlPath, function() {
+      var html     = fs.readFileSync(htmlPath, 'utf8');
+      var result   = koc.parseErrorMessage(html);
+      //console.log(result);
+      it('should be a string', function() {
+        return result.should.be.a('string');
+      });
+      it( "should not be a string of length > 4", function() {
+       return result.should.be.a('string').and.has.length.above(4);
+      } );
+      it( "should equal '" + expected + "'", function() {
+       return result.should.be.a('string').and.equal(expected);
+      } );
+    });
+  });
+});
+
+describe('Parse Banned' , function() {
+  var htmlPaths = [
+    // page                              , expected to be
+    [ 'test/html/bansuspend.html', 'You have been banned for Violating KoC Rules' ]
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath = page[0];
+    var expected = page[1];
+    describe('#local ' + htmlPath, function() {
+      var html     = fs.readFileSync(htmlPath, 'utf8');
+      var result   = koc.parseBannedMessage(html);
+      //console.log(result);
+      it('should be a string', function() {
+        return result.should.be.a('string');
+      });
+      it( "should not be a string of length > 4", function() {
+       return result.should.be.a('string').and.has.length.above(4);
+      } );
+      it( "should equal '" + expected + "'", function() {
+       return result.should.be.a('string').and.equal(expected);
+      } );
+    });
+  });
+});

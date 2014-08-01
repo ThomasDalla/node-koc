@@ -13,7 +13,7 @@ var koc = function(session) {
     this.location                = "";
     this.stats                   = {};
     this.username                = "???";
-    this.help                    = "";
+    this.help                    = ""; // Help from the New User Advisor, if present
 };
 
 // Helpers (outside the lib)
@@ -27,20 +27,6 @@ var koc = function(session) {
 var validateEmail = function(email) {
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
-};
-
-/**
- * Get the error message from a KoC error.php page
- * @param {Text} the HTML page to parse the error from
- * @return {Text} the error message, if found, "Unknown Error" if not
- */
-var getErrorMessage = function( html ) {
-    var re = /<h3>Error<\/h3>([^<]+)</gmi;
-    var m  = re.exec( html );
-    if( m !== null) {
-        return m[1].trim();
-    }
-    return "Unknown Error";
 };
 
 var createTrRegExp = function(header, content) {
@@ -217,6 +203,37 @@ koc.prototype.getTuring = function(html) {
     return "";
 };
 
+// Parsers
+// -----------------------------------------------------------------------------
+
+/**
+ * Get the error message from a KoC error.php page
+ * @param {Text} the HTML page to parse the error from
+ * @return {Text} the error message, if found, "Unknown Error" otherwise
+ */
+koc.prototype.parseErrorMessage = function( html ) {
+    var re = /<h3>Error<\/h3>([^<]+)</gmi;
+    var m  = re.exec( html );
+    if( m !== null) {
+        return m[1].trim();
+    }
+    return "Unknown Error";
+};
+
+/**
+ * Get the reason for being banned from a KoC bansuspend.php page
+ * @param {Text} the HTML page to parse the error from
+ * @return {Text} the reason, if found, "Unknown Reason" otherwise
+ */
+koc.prototype.parseBannedMessage = function( html ) {
+    var re = /Banned<\/[^>]*>\s*([^<]+)/gmi;
+    var m  = re.exec( html );
+    if( m !== null) {
+        return m[1].trim();
+    }
+    return "Unknown Reason";
+};
+
 // Web Requests Helpers
 // -----------------------------------------------------------------------------
 
@@ -304,7 +321,13 @@ koc.prototype.createRequestPromise = function( options, onSuccess ) {
         if(response.request.path == "/error.php") {
             return _koc.prepareResponse({
                 success: false,
-                error: getErrorMessage( body )
+                error: _koc.parseErrorMessage( body )
+            });
+        }
+        if(response.request.path == "/bansuspend.php") {
+            return _koc.prepareResponse({
+                success: false,
+                error: _koc.parseBannedMessage( body )
             });
         }
         if(catchVerify && response.request.path == "/verify.php") {
