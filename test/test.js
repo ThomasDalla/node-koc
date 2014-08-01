@@ -1,3 +1,5 @@
+/*global describe, it, before, beforeEach, after, afterEach */
+
 var chai           = require('chai'),
     chaiAsPromised = require("chai-as-promised"),
     fs             = require('fs'),
@@ -256,6 +258,57 @@ describe('Parse the Races Information', function() {
             .that.has.deep.property('[0]')
               .that.contain.keys('race','description','features','image','colours')
               .that.has.property('colours').that.is.an('object').that.contain.keys('background','border','text');
+    });
+  });
+});
+
+describe('Parse New User Advisor' , function() {
+  var htmlPaths = [
+    // page                                        , has it,     expected to contain
+    [ 'test/html/alliances_first-time.html'        , true, 'Alliances allow players to work together'　　　　　　　　　　],
+    [ 'test/html/armory_first-time.html'           , true, 'status of your weapons and tools'                            ],
+    [ 'test/html/attacklog_first-time.html'        , true, 'record of all incoming and outgoing attacks'                 ],
+    [ 'test/html/base_first-login.html'            , true, 'This is your Command Center'                                 ],
+    [ 'test/html/base_01.html'                     , true, 'This is your Command Center'                                 ],
+    [ 'test/html/base_mails_read.html'             , true, 'This is your Command Center'                                 ],
+    [ 'test/html/battlefield_full_logged-out.html' , false                                                               ],
+    [ 'test/html/battlefield_xhr_logged-out.html'  , false                                                               ],
+    [ 'test/html/battlefield_xhr_logged-in.html'   , false                                                               ],
+    [ 'test/html/battlefield_full_first-login.html', true, 'This is the battlefield page'                                ],
+    [ 'test/html/buddylist_first-time.html'        , true, 'players of interest for later reference'                     ],
+    [ 'test/html/conquest_first-time.html'         , true, 'quickest way to gain Experience'                             ],
+    [ 'test/html/home.html'                        , false                                                               ],
+    [ 'test/html/intel_first-time.html'            , true, 'results of intercepted incoming Sabotage and Recon missions' ],
+    [ 'test/html/mercs_first-time.html'            , true, 'increase your Army\'s size for a fee'                        ],
+    [ 'test/html/recruit_first-time.html'          , true, 'effective way for you to build your army\'s morale'          ],
+    [ 'test/html/stats_first-time.html'            , true, 'view information about other players'                        ],
+    [ 'test/html/train_first-time.html'            , true, 'train your soldiers to be one of four types'                 ],
+    [ 'test/html/verify.html'                      , false                                                               ]
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath      = page[0];
+    var hasHelp       = page[1];
+    var shouldContain = page[2];
+    describe('#local ' + htmlPath, function() {
+      var html     = fs.readFileSync(htmlPath, 'utf8');
+      var result   = koc.parseNewUserAdvisor(html);
+      //console.log(result);
+      it('should be a string', function() {
+        return result.should.be.a('string');
+      });
+      if(hasHelp) {
+         it( "should not be a string of length > 4", function() {
+           return result.should.be.a('string').and.has.length.above(4);
+         } );
+         it( "should contain '" + shouldContain+ "'", function() {
+           return result.should.be.a('string').and.contain(shouldContain);
+         } );
+      }
+      else {
+         it( "should be empty", function() {
+           return result.should.be.a('string').and.equal('');
+         } );
+      }
     });
   });
 });

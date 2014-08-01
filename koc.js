@@ -13,6 +13,7 @@ var koc = function(session) {
     this.location                = "";
     this.stats                   = {};
     this.username                = "???";
+    this.help                    = "";
 };
 
 // Helpers (outside the lib)
@@ -191,6 +192,7 @@ koc.prototype.prepareResponse = function( response ) {
     response.session  = this.getSession();
     response.location = this.location;
     response.stats    = this.stats;
+    response.help     = this.help;
     // The verify and error pages notably doesn't show the username and fortification in the title
     // Check and get it from the last known username instead
     if( this.stats.username !== undefined && this.stats.username.indexOf(" ")>=0 )
@@ -286,11 +288,12 @@ koc.prototype.createRequestPromise = function( options, onSuccess ) {
     var catchVerify = options.url.indexOf("verify") == -1 && options.url.indexOf("signup") == -1;
     var p = request(options)
     .then( function(res) {
-        var response = res[0];
-        var body     = res[1];
-        _koc.updateKocSession(response.headers);
+        var response  = res[0];
+        var body      = res[1];
         _koc.location = response.request.path;
-        _koc.stats = _koc.parseLeftSideBox(body);
+        _koc.stats    = _koc.parseLeftSideBox(body);
+        _koc.help     = _koc.parseNewUserAdvisor(body);
+        _koc.updateKocSession(response.headers);
         if (response.statusCode != 200) {
             return _koc.prepareResponse({
                 success: false,
@@ -907,6 +910,24 @@ koc.prototype.getRacesInformation = function() {
         });
     });
     return p;
-}
+};
+
+koc.prototype.parseNewUserAdvisor = function(html) {
+    if( html === undefined || html === null || !html.length )
+        return '';
+    var re = /New\s*User\s*Advisor<[^>]*>\s*<[^>]*>\s*<[^>]*>\s*<[^>]*>\s*/gmi;
+    var m  = re.exec(html);
+    if(m===null) return '';
+    var startIndex = re.lastIndex;
+    re = /<\/td>/gmi;
+    re.lastIndex = startIndex;
+    m = re.exec(html);
+    if(m===null) return '';
+    var endIndex       = m.index;
+    var rawResult      = html.substring(startIndex, endIndex);
+    var strippedResult = stripHtml(rawResult);
+    var finalResult    = strippedResult.replace(/\s+/gmi, " ");
+    return finalResult;
+};
 
 module.exports = koc;
