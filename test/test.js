@@ -157,6 +157,9 @@ describe('Parse Base' , function() {
           });
         });
       });
+      it( "Should have the number of changes left", function() {
+        return result.should.have.property( "raceChangesLeft" ).that.is.a('number').that.is.gte(0);
+      });
     } );
   });
   describe( "#remote failing because no session id", function() {
