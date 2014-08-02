@@ -3,10 +3,10 @@
 var chai           = require('chai'),
     chaiAsPromised = require("chai-as-promised"),
     fs             = require('fs'),
-    KoC            = require('../koc'),
+    KoC            = require('../lib/koc'),
     koc            = new KoC();
 chai.use(chaiAsPromised);
-var should = chai.should(); // seems unused but it required
+chai.should();
 
 describe('Parse Battlefield' , function() {
   var htmlPaths = [
@@ -15,25 +15,25 @@ describe('Parse Battlefield' , function() {
     'test/html/battlefield_xhr_logged-in.html',
     'test/html/battlefield_full_first-login.html'
   ];
-  for(var iHtml in htmlPaths) {
-    var htmlPath = htmlPaths[iHtml];
+  htmlPaths.forEach( function(htmlPath) {
     describe('#' + htmlPath, function() {
       var html     = fs.readFileSync(htmlPath, 'utf8');
-      var result   = koc.parseBattlefield(html);
+      var result   = koc.parser.parseBattlefield(html);
       it('should return 20 records', function() {
         return result.length.should.equal(20);
       });
-      for(var index in result) {
-        var player = result[index];
+      var index = 0;
+      result.forEach( function(player) {
+        index++;
         var requiredFields = ['userid','alliance','username','armySize','race','gold','rank'];
-        for(var i in requiredFields){
-          it( "player #" + (index+1) + " should have '" + requiredFields[i] +"'", function() {
-            return player.should.have.property(requiredFields[i]).that.is.not.undefined;
+        requiredFields.forEach(function(requiredField) {
+          it( "player #" + index.toString() + " should have '" + requiredField +"'", function() {
+            return player.should.have.property(requiredField).that.is.not.undefined;
           });
-        }
-      }
+        });
+      });
     } );
-  }
+  } );
 } );
 
 describe('Login' , function() {
@@ -113,7 +113,7 @@ describe('Parse Base' , function() {
   htmlPaths.forEach(function(htmlPath){
     describe('#local ' + htmlPath, function() {
       var html     = fs.readFileSync(htmlPath, 'utf8');
-      var result   = koc.parseBase(html);
+      var result   = koc.parser.parseBase(html);
       //console.log(result);
       it('should be an object', function() {
         return result.should.be.an.object;
@@ -212,7 +212,7 @@ describe('Parse Left-Side Box' , function() {
     var hasBox   = page[1];
     describe('#local ' + htmlPath, function() {
       var html     = fs.readFileSync(htmlPath, 'utf8');
-      var result   = koc.parseLeftSideBox(html);
+      var result   = koc.parser.parseLeftSideBox(html);
       //console.log(result);
       it('should be an object', function() {
         return result.should.be.an.object;
@@ -234,7 +234,7 @@ describe('Parse Left-Side Box' , function() {
   });
 });
 
-describe('Parse the Races Information', function() {
+describe('Parse Races Information', function() {
   describe( "#remote", function() {
     var basePromise = koc.getRacesInformation();
     it('should be fulfilled', function() {
@@ -242,6 +242,9 @@ describe('Parse the Races Information', function() {
     });
     it('should have success field that is true', function() {
       return basePromise.should.eventually.have.property("success").that.is.true;
+    });
+    it('should have kocHost field that is a string of length > 4', function() {
+      return basePromise.should.eventually.have.property("kocHost").that.is.a('string').that.has.length.above(4);
     });
     it('should have races field that is an array of 5 items and features should be an array', function() {
       return basePromise.should.eventually.have.property("races")
@@ -251,7 +254,7 @@ describe('Parse the Races Information', function() {
               .that.contain.keys('race','description','features','image','colours')
               .that.has.property('features').that.is.an('array');
     });
-    it('should have races field that is an array of 5 items an colours should be an object', function() {
+    it('should have races field that is an array of 5 items and colours should be an object', function() {
       return basePromise.should.eventually.have.property("races")
             .that.is.an('array')
             .that.has.length(5)
@@ -291,13 +294,13 @@ describe('Parse New User Advisor' , function() {
     var shouldContain = page[2];
     describe('#local ' + htmlPath, function() {
       var html     = fs.readFileSync(htmlPath, 'utf8');
-      var result   = koc.parseNewUserAdvisor(html);
+      var result   = koc.parser.parseNewUserAdvisor(html);
       //console.log(result);
       it('should be a string', function() {
         return result.should.be.a('string');
       });
       if(hasHelp) {
-         it( "should not be a string of length > 4", function() {
+         it( "should be a string of length > 4", function() {
            return result.should.be.a('string').and.has.length.above(4);
          } );
          it( "should contain '" + shouldContain+ "'", function() {
@@ -324,12 +327,12 @@ describe('Parse Error' , function() {
     var expected = page[1];
     describe('#local ' + htmlPath, function() {
       var html     = fs.readFileSync(htmlPath, 'utf8');
-      var result   = koc.parseErrorMessage(html);
+      var result   = koc.parser.parseErrorMessage(html);
       //console.log(result);
       it('should be a string', function() {
         return result.should.be.a('string');
       });
-      it( "should not be a string of length > 4", function() {
+      it( "should be a string of length > 4", function() {
        return result.should.be.a('string').and.has.length.above(4);
       } );
       it( "should equal '" + expected + "'", function() {
@@ -349,12 +352,12 @@ describe('Parse Banned' , function() {
     var expected = page[1];
     describe('#local ' + htmlPath, function() {
       var html     = fs.readFileSync(htmlPath, 'utf8');
-      var result   = koc.parseBannedMessage(html);
+      var result   = koc.parser.parseBannedMessage(html);
       //console.log(result);
       it('should be a string', function() {
         return result.should.be.a('string');
       });
-      it( "should not be a string of length > 4", function() {
+      it( "should be a string of length > 4", function() {
        return result.should.be.a('string').and.has.length.above(4);
       } );
       it( "should equal '" + expected + "'", function() {

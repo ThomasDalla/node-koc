@@ -1,4 +1,4 @@
 test:
-	./node_modules/.bin/mocha --reporter nyan --timeout 5000
+	./node_modules/.bin/mocha --reporter nyan --timeout 2000
 
  .PHONY: test
