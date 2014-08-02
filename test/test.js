@@ -366,3 +366,37 @@ describe('Parse Banned' , function() {
     });
   });
 });
+
+describe('Parse Age' , function() {
+  var htmlPaths = [
+    // page
+    'test/html/alliances_first-time.html',
+    'test/html/armory_first-time.html',
+    'test/html/attacklog_first-time.html',
+    'test/html/base_first-login.html',
+    'test/html/base_01.html',
+    'test/html/base_mails_read.html',
+    'test/html/battlefield_full_logged-out.html',
+    //'test/html/battlefield_xhr_logged-out.html',
+    //'test/html/battlefield_xhr_logged-in.html',
+    'test/html/battlefield_full_first-login.html',
+    'test/html/buddylist_first-time.html',
+    'test/html/conquest_first-time.html',
+    'test/html/home.html',
+    'test/html/intel_first-time.html',
+    'test/html/mercs_first-time.html',
+    'test/html/recruit_first-time.html',
+    'test/html/stats_first-time.html',
+    'test/html/train_first-time.html',
+    'test/html/verify.html'
+  ];
+  htmlPaths.forEach(function(htmlPath){
+    describe('#local ' + htmlPath, function() {
+      var html = fs.readFileSync(htmlPath, 'utf8');
+      var age  = koc.parser.guessAge(html);
+      it( "age should be 17", function() {
+       return age.should.equal(17);
+      } );
+    });
+  });
+});
