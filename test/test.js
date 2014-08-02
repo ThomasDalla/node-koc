@@ -108,7 +108,8 @@ describe('Signup', function() {
 describe('Parse Base' , function() {
   var htmlPaths = [
     'test/html/base_first-login.html',
-    'test/html/base_01.html'
+    'test/html/base_01.html',
+    'test/html/base_commander.html'
   ];
   htmlPaths.forEach(function(htmlPath){
     describe('#local ' + htmlPath, function() {
@@ -150,13 +151,15 @@ describe('Parse Base' , function() {
         return result.should.have.property( "previousLogins" ).that.is.an('array');
       });
       var previousLogins = result.previousLogins;
-      previousLogins.forEach( function(previousLogin) {
-        ['ip','date','success'].forEach(function(previousLoginField) {
-          it( "A previous login should have '" + previousLoginField + "' that is not empty", function() {
-            return previousLogin.should.have.property( previousLoginField ).that.is.not.empty;
+      if( previousLogins !== undefined ) {
+        previousLogins.forEach( function(previousLogin) {
+          ['ip','date','success'].forEach(function(previousLoginField) {
+            it( "A previous login should have '" + previousLoginField + "' that is not empty", function() {
+              return previousLogin.should.have.property( previousLoginField ).that.is.not.empty;
+            });
           });
         });
-      });
+      }
       it( "Should have the number of changes left", function() {
         return result.should.have.property( "raceChangesLeft" ).that.is.a('number').that.is.gte(0);
       });
@@ -399,6 +402,90 @@ describe('Parse Age' , function() {
       var age  = koc.parser.guessAge(html);
       it( "age should be 17", function() {
        return age.should.equal(17);
+      } );
+    });
+  });
+});
+
+describe('Parse Commander Change' , function() {
+  var htmlPaths = [
+    // page                              , expected to be
+    [ 'test/html/commander_change.html', {
+      success                  : true,
+      nbTimesCanChangeCommander: 4,
+      errorMessage             : '',
+      statement                : '/images/commchange.gif'
+    } ],
+    [ 'test/html/commander_change_wrong-pass.html', {
+      success                  : true,
+      nbTimesCanChangeCommander: 4,
+      errorMessage             : 'Your current password is required to make the requested changes.',
+      statement                : '/images/commchange.gif'
+    } ],
+    [ 'test/html/commander_change_wrong-statement.html', {
+      success                  : true,
+      nbTimesCanChangeCommander: 4,
+      errorMessage             : 'Please copy the text exactly as it appears',
+      statement                : '/images/commchange.gif'
+    } ],
+    [ 'test/html/base_01.html', { // not found
+      success                  : false,
+      nbTimesCanChangeCommander: -1,
+      errorMessage             : '',
+      statement                : ''
+    } ],
+    [ 'test/html/commander_change_max.html', { // not found
+      success                  : false,
+      nbTimesCanChangeCommander: -1,
+      errorMessage             : 'You cannot change your commander any more.',
+      statement                : ''
+    } ]
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath = page[0];
+    var expected = page[1];
+    describe('#local ' + htmlPath, function() {
+      var html     = fs.readFileSync(htmlPath, 'utf8');
+      var result   = koc.parser.parseCommanderChange(html);
+      it('should be an object', function() {
+        return result.should.be.an('object');
+      });
+      it( "should equal expected value", function() {
+       return result.should.eql( expected );
+      } );
+    });
+  });
+});
+
+describe('Parse Menu' , function() {
+  var htmlPaths = [
+    // page
+    'test/html/alliances_first-time.html',
+    'test/html/armory_first-time.html',
+    'test/html/attacklog_first-time.html',
+    'test/html/base_first-login.html',
+    'test/html/base_01.html',
+    'test/html/base_mails_read.html',
+    //'test/html/battlefield_full_logged-out.html',
+    //'test/html/battlefield_xhr_logged-out.html',
+    //'test/html/battlefield_xhr_logged-in.html',
+    'test/html/battlefield_full_first-login.html',
+    'test/html/buddylist_first-time.html',
+    'test/html/conquest_first-time.html',
+    //'test/html/home.html',
+    'test/html/intel_first-time.html',
+    'test/html/mercs_first-time.html',
+    'test/html/recruit_first-time.html',
+    'test/html/stats_first-time.html',
+    'test/html/train_first-time.html',
+    //'test/html/verify.html'
+  ];
+  htmlPaths.forEach(function(htmlPath){
+    describe('#local ' + htmlPath, function() {
+      var html   = fs.readFileSync(htmlPath, 'utf8');
+      var result = koc.parser.parseMenu(html);
+      it( "should be a menu", function() {
+       return result.should.be.is.an('array').that.has.length.above(3);
       } );
     });
   });
