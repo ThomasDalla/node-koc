@@ -516,3 +516,52 @@ describe('Test Help', function() {
     });
   }
 });
+
+describe('Parse Forgot Pass' , function() {
+  var htmlPaths = [
+    // page
+    [ 'test/html/forgotpass.html'               , ""                                                                           ],
+    [ 'test/html/forgotpass_wrong-email.html'   , "That email address does not exist in our system."                           ],
+    [ 'test/html/forgotpass_wrong-username.html', "That username does not exist in our system."                                ],
+    [ 'test/html/forgotpass_invalid-email.html' , "Invalid Email"                                                              ],
+    [ 'test/html/forgotpass_success.html'       , "Your login details will be emailed to you in 30 minutes."                   ],
+    [ 'test/html/forgotpass_success2.html'      , "Your login details have been emailed to you and will arrive in 30 minutes." ]
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath = page[0];
+    var expected = page[1];
+    describe('#local ' + htmlPath, function() {
+      var html   = fs.readFileSync(htmlPath, 'utf8');
+      var result = koc.parser.parseForgotPass(html);
+      it( "should be '" + expected + "'", function() {
+       return result.should.be.a('string').that.eql(expected);
+      } );
+    });
+  });
+  describe( "#remote error because unknown e-mail", function() {
+    var localKoC = new KoC();
+    var basePromise = localKoC.forgotPass( "", "warlord@koc.abc");
+    it('should be fulfilled', function() {
+      return basePromise.should.be.fulfilled;
+    });
+    it('should have success field that is false', function() {
+      return basePromise.should.eventually.have.property("success").that.is.false;
+    });
+    it('should have error field == "That email address does not exist in our system."', function() {
+      return basePromise.should.eventually.have.property("error").that.eql("That email address does not exist in our system.");
+    });
+  });
+  describe( "#remote error because unknown username", function() {
+    var localKoC = new KoC();
+    var basePromise = localKoC.forgotPass( "War Lord", "");
+    it('should be fulfilled', function() {
+      return basePromise.should.be.fulfilled;
+    });
+    it('should have success field that is false', function() {
+      return basePromise.should.eventually.have.property("success").that.is.false;
+    });
+    it('should have error field == "That email address does not exist in our system."', function() {
+      return basePromise.should.eventually.have.property("error").that.eql("That username does not exist in our system.");
+    });
+  });
+});
