@@ -485,8 +485,34 @@ describe('Parse Menu' , function() {
       var html   = fs.readFileSync(htmlPath, 'utf8');
       var result = koc.parser.parseMenu(html);
       it( "should be a menu", function() {
-       return result.should.be.is.an('array').that.has.length.above(3);
+       return result.should.be.an('array').that.has.length.above(3);
       } );
     });
   });
+});
+
+describe('Test Help', function() {
+  var help = koc.getHelp();
+  it( "should be an array of 5 items", function() {
+    return help.should.be.an('array').that.has.length(5);
+  } );
+  if( help.length>0) {
+    var gameplay = help[0];
+    it( "the first item should have title 'Gameplay'", function() {
+      return gameplay.should.be.an('object').that.has.property('title').that.deep.eql('Gameplay');
+    } );
+    it( "the first item should have 5 sections", function() {
+      return gameplay.should.be.an('object').that.has.property('sections').that.has.length(6);
+    } );
+    var i=0;
+    help.forEach( function(helpRootItem){
+      it( "item "+ i + " should have 'title', 'help' and 'sections'", function() {
+        return gameplay.should.be.an('object').that.has.keys('sections', 'help', 'title');
+      } );
+      it( "item "+ i + " should have non-empty 'title'", function() {
+        return gameplay.should.be.an('object').that.have.property('title').that.is.not.empty;
+      } );
+      i++;
+    });
+  }
 });
