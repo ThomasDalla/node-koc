@@ -540,28 +540,44 @@ describe('Parse Forgot Pass' , function() {
   });
   describe( "#remote error because unknown e-mail", function() {
     var localKoC = new KoC();
-    var basePromise = localKoC.forgotPass( "", "warlord@koc.abc");
+    var forgotPassPromise = localKoC.forgotPass( "", "warlord@koc.abc");
     it('should be fulfilled', function() {
-      return basePromise.should.be.fulfilled;
+      return forgotPassPromise.should.be.fulfilled;
     });
     it('should have success field that is false', function() {
-      return basePromise.should.eventually.have.property("success").that.is.false;
+      return forgotPassPromise.should.eventually.have.property("success").that.is.false;
     });
     it('should have error field == "That email address does not exist in our system."', function() {
-      return basePromise.should.eventually.have.property("error").that.eql("That email address does not exist in our system.");
+      return forgotPassPromise.should.eventually.have.property("error").that.eql("That email address does not exist in our system.");
     });
   });
   describe( "#remote error because unknown username", function() {
     var localKoC = new KoC();
-    var basePromise = localKoC.forgotPass( "War Lord", "");
+    var forgotPassPromise = localKoC.forgotPass( "War Lord", "");
     it('should be fulfilled', function() {
-      return basePromise.should.be.fulfilled;
+      return forgotPassPromise.should.be.fulfilled;
     });
     it('should have success field that is false', function() {
-      return basePromise.should.eventually.have.property("success").that.is.false;
+      return forgotPassPromise.should.eventually.have.property("success").that.is.false;
     });
     it('should have error field == "That email address does not exist in our system."', function() {
-      return basePromise.should.eventually.have.property("error").that.eql("That username does not exist in our system.");
+      return forgotPassPromise.should.eventually.have.property("error").that.eql("That username does not exist in our system.");
     });
   });
 });
+
+describe('Logout' , function() {
+  describe( "#remote logout", function() {
+    var localKoC = new KoC();
+    var logoutPromise = localKoC.logout();
+    it('should be fulfilled', function() {
+      return logoutPromise.should.be.fulfilled;
+    });
+    it('should have success field (true)', function() {
+      return logoutPromise.should.eventually.have.property("success").that.is.true;
+    });
+    it('should have error field (empty)', function() {
+      return logoutPromise.should.eventually.have.property("error").that.is.empty;
+    });
+  });
+} );
