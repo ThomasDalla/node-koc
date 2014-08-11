@@ -109,6 +109,7 @@ describe('Parse Base' , function() {
   var htmlPaths = [
     'test/html/base_first-login.html',
     'test/html/base_01.html',
+    'test/html/base_02.html',
     'test/html/base_commander.html'
   ];
   htmlPaths.forEach(function(htmlPath){
@@ -131,7 +132,7 @@ describe('Parse Base' , function() {
             'spyRating', 'spyRatingRank', 'sentryRating', 'sentryRatingRank' ] ],
         [ 'personnel', [ 'trainedAttackSoldiers', 'trainedAttackMercenaries',
           'trainedDefenseSoldiers', 'trainedDefenseMercenaries',
-          'untrainedSoliders', 'untrainedMercenaries', 'spies', 'sentries',
+          'untrainedSoldiers', 'untrainedMercenaries', 'spies', 'sentries',
           'armyMorale', 'totalFightingForce' ] ]
       ];
       requiredFields.forEach(function(requiredField){
@@ -163,6 +164,25 @@ describe('Parse Base' , function() {
       it( "Should have the number of changes left", function() {
         return result.should.have.property( "raceChangesLeft" ).that.is.a('number').that.is.gte(0);
       });
+      it( "Should have an array 'recentAttacksOnYou'", function() {
+        return result.should.have.property( "recentAttacksOnYou" ).that.is.an('array');
+      });
+      var recentAttacks = result.recentAttacksOnYou;
+      if( recentAttacks !== undefined ) {
+        recentAttacks.forEach( function(recentAttack) {
+          ['date','result'].forEach(function(previousLoginField) {
+            it( "A recent attack should have '" + previousLoginField + "' that is not empty", function() {
+              return recentAttack.should.have.property( previousLoginField ).that.is.not.empty;
+            });
+          });
+          it( "should have a field 'enemy' that has non-empty property 'username'", function() {
+            return recentAttack.should.have.property('enemy').that.is.an('object').that.has.property('username').that.is.not.empty;
+          });
+          it( "should have a field 'enemy' that has non-empty property 'userid'", function() {
+            return recentAttack.should.have.property('enemy').that.is.an('object').that.has.property('userid').that.is.not.empty;
+          });
+        });
+      }
     } );
   });
   describe( "#remote failing because no session id", function() {
