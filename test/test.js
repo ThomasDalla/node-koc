@@ -601,3 +601,67 @@ describe('Logout' , function() {
     });
   });
 } );
+
+describe('Parse Full User Stats' , function() {
+  var htmlPaths = [
+    // page                                         , commander, nb officers, total nb officers, number of alliances, primary alliance
+    [ 'test/html/stats_NoOfficer_Alliance.html'     , "P0lytech"         ,  0,  0, 1, 'Forces of Darkness' ],
+    [ 'test/html/stats_NoOfficer_NoAlliance.html'   , "chosen"           ,  0,  0, 0, null                 ],
+    [ 'test/html/stats_Officers_Alliance.html'      , "TheGodFather_LaCN", 10, 25, 1, "La Cosa Nostra"     ],
+    [ 'test/html/stats_Officers_NoMainAlliance.html', 'None'             ,  7,  7, 1, null                 ],
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath        = page[0];
+    var commander       = page[1];
+    var officersNb      = page[2];
+    var totalOfficersNb = page[3];
+    var alliancesNb     = page[4];
+    var primaryAlliance = page[5];
+    describe('#local ' + htmlPath, function() {
+      var html     = fs.readFileSync(htmlPath, 'utf8');
+      var result   = koc.parser.parseFullStats(html);
+      //console.log(result);
+      it('should be an object', function() {
+        return result.should.be.an('object');
+      });
+      it('should have success==true', function() {
+        return result.should.have.property('success').that.is.true;
+      });
+      it('should have user which is an object', function() {
+        return result.should.have.property('user').that.is.an('object').that.contain.keys(
+          'username',
+          'commander',
+          'race',
+          'rank',
+          'highestRank',
+          'armyMorale',
+          'fortification',
+          'buddyStatus',
+          'alliances',
+          'officers'
+        );
+      });
+      it('should have commander ' + commander, function() {
+        return result.should.have.property('user').that.has.property('commander').that.has.property('username').that.eql(commander);
+      });
+      it('should have ' + officersNb + ' officers', function() {
+        return result.should.have.property('user').that.has.property('officers').that.is.an('array').that.has.length(officersNb);
+      });
+      it('should have ' + totalOfficersNb + ' total officers', function() {
+        return result.should.have.property('user').that.has.property('totalOfficersNb').that.eql(totalOfficersNb);
+      });
+      it('should have ' + alliancesNb + ' alliances', function() {
+        return result.should.have.property('user').that.has.property('alliances').that.is.an('array').that.has.length(alliancesNb);
+      });
+      if(primaryAlliance !== null) {
+        it('should have primary alliance ' + primaryAlliance, function() {
+          return result.should.have.property('user').that.has.property('primaryAlliance').that.is.an('object').that.has.property('name').that.eql(primaryAlliance);
+        });
+      } else {
+        it('should have no primary alliance ' + primaryAlliance, function() {
+          return result.should.have.property('user').that.has.property('primaryAlliance').that.is.an('object').that.has.property('name').that.is.empty;
+        });
+      }
+    });
+  });
+});
