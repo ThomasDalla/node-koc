@@ -665,3 +665,80 @@ describe('Parse Full User Stats' , function() {
     });
   });
 });
+
+
+describe('Parse Armory' , function() {
+  var htmlPaths = [
+    // page                              , expected to be
+    [ 'test/html/armory_first-time.html', {
+      nbAttackWeapons         : 2,
+      nbDefenseWeapons        : 0,
+      nbSpyTools              : 0,
+      nbSentryTools           : 0,
+      fortification           : "Camp (x 1)",
+      siegeTechnology         : "None (x 1)",
+    } ],
+    [ 'test/html/armory_new-user-advisor.html', {
+      nbAttackWeapons         : 6,
+      nbDefenseWeapons        : 1,
+      nbSpyTools              : 4,
+      nbSentryTools           : 4,
+      fortification           : "Portcullis (x 3.81)",
+      siegeTechnology         : "Catapults (x 4.83)",
+    } ]
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath = page[0];
+    var expected = page[1];
+    describe('#local ' + htmlPath, function() {
+      var html     = fs.readFileSync(htmlPath, 'utf8');
+      var result   = koc.parser.parseArmory(html);
+      it('should be an object', function() {
+        return result.should.be.an('object').that.contain.keys('currentWeapons','buyWeapons','upgrades','militaryEffectiveness','personnel');
+      });
+      [{
+        type: "Attack Weapons",
+        nbWeapons: expected.nbAttackWeapons
+      },{
+        type: "Defense Weapons",
+        nbWeapons: expected.nbDefenseWeapons
+      },{
+        type: "Spy Tools",
+        nbWeapons: expected.nbSpyTools
+      },{
+        type: "Sentry Tools",
+        nbWeapons: expected.nbSentryTools
+      }].forEach(function(currentWeapon){
+        it( 'buyWeapons should have more than one ' + currentWeapon.type, function() {
+         return result.should.be.an('object').that.has.property('buyWeapons').that.has.property(currentWeapon.type).that.is.an('array').that.has.length.gt(1);
+        } );
+        if(currentWeapon.nbWeapons>0) {
+          it( 'currentWeapons should have ' + currentWeapon.nbWeapons + ' ' + currentWeapon.type, function() {
+           return result.should.be.an('object').that.has.property('currentWeapons').that.has.property(currentWeapon.type).that.is.an('array').that.has.length(currentWeapon.nbWeapons);
+          } );
+        }
+        else {
+          it( 'currentWeapons should have no ' + currentWeapon.type, function() {
+           return result.should.be.an('object').that.has.property('currentWeapons').that.not.has.property(currentWeapon.type);
+          } );
+        }
+      });
+      it('current fortification should be ' + expected.fortification, function() {
+        return result.should.be.an('object').that.has.property('upgrades').that.has.property('fortification').that.has.property('current').that.eql(expected.fortification);
+      });
+      it('current siege technology should be ' + expected.siegeTechnology, function() {
+        return result.should.be.an('object').that.has.property('upgrades').that.has.property('siegeTechnology').that.has.property('current').that.eql(expected.siegeTechnology);
+      });
+      // Personnel
+      [ 'Trained Attack Soldiers', 'Trained Attack Mercenaries', 'Trained Defense Soldiers', 'Trained Defense Mercenaries',
+        'Untrained Soldiers', 'Untrained Mercenaries', 'Spies', 'Sentries', 'Army Morale', 'Total Fighting Force'].forEach(function(personnelProperty){
+          it( 'personnel should have ' + personnelProperty, function() {
+           return result.should.be.an('object').that.has.property('personnel').that.has.property(personnelProperty).that.is.a('number');
+          } );
+        });
+      it('militaryEffectiveness should have at least 4 items (SA, DA, Spy, Sentry)', function() {
+        return result.should.be.an('object').that.has.property('militaryEffectiveness').that.is.an('array').that.has.length.gte(4);
+      });
+    });
+  });
+});
