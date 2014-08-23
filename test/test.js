@@ -680,6 +680,8 @@ describe('Parse Armory' , function() {
       nbSentryTools           : 0,
       fortification           : "Camp (x 1)",
       siegeTechnology         : "None (x 1)",
+      turing                  : "hruen",
+      error                   : "",
     } ],
     [ 'test/html/armory_new-user-advisor.html', {
       nbAttackWeapons         : 6,
@@ -688,6 +690,8 @@ describe('Parse Armory' , function() {
       nbSentryTools           : 4,
       fortification           : "Portcullis (x 3.81)",
       siegeTechnology         : "Catapults (x 4.83)",
+      turing                  : "fykdg",
+      error                   : "",
     } ],
     [ 'test/html/armory_repair.html', {
       nbAttackWeapons         : 2,
@@ -696,6 +700,18 @@ describe('Parse Armory' , function() {
       nbSentryTools           : 0,
       fortification           : "Camp (x 1)",
       siegeTechnology         : "None (x 1)",
+      turing                  : "dbh",
+      error                   : "",
+    } ],
+    [ 'test/html/armory_not-enough-money.html', {
+      nbAttackWeapons         : 2,
+      nbDefenseWeapons        : 1,
+      nbSpyTools              : 0,
+      nbSentryTools           : 0,
+      fortification           : "Camp (x 1)",
+      siegeTechnology         : "None (x 1)",
+      turing                  : "udnvm",
+      error                   : "Not enough money for those items.",
     } ],
   ];
   htmlPaths.forEach(function(page){
@@ -705,7 +721,13 @@ describe('Parse Armory' , function() {
       var html     = fs.readFileSync(htmlPath, 'utf8');
       var result   = koc.parser.parseArmory(html);
       it('should be an object', function() {
-        return result.should.be.an('object').that.contain.keys('currentWeapons','buyWeapons','upgrades','militaryEffectiveness','personnel','repairAll');
+        return result.should.be.an('object').that.contain.keys('currentWeapons','buyWeapons','upgrades','militaryEffectiveness','personnel','repairAll','turing','error');
+      });
+      it('turing should be: ' + expected.turing, function() {
+        return result.should.be.an('object').that.has.property('turing').that.eql(expected.turing);
+      });
+      it('error should be: ' + expected.error, function() {
+        return result.should.be.an('object').that.has.property('error').that.eql(expected.error);
       });
       [{
         type: "Attack Weapons",
