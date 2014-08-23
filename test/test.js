@@ -702,7 +702,7 @@ describe('Parse Armory' , function() {
       var html     = fs.readFileSync(htmlPath, 'utf8');
       var result   = koc.parser.parseArmory(html);
       it('should be an object', function() {
-        return result.should.be.an('object').that.contain.keys('currentWeapons','buyWeapons','upgrades','militaryEffectiveness','personnel');
+        return result.should.be.an('object').that.contain.keys('currentWeapons','buyWeapons','upgrades','militaryEffectiveness','personnel','repairAll');
       });
       [{
         type: "Attack Weapons",
