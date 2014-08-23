@@ -685,7 +685,15 @@ describe('Parse Armory' , function() {
       nbSentryTools           : 4,
       fortification           : "Portcullis (x 3.81)",
       siegeTechnology         : "Catapults (x 4.83)",
-    } ]
+    } ],
+    [ 'test/html/armory_repair.html', {
+      nbAttackWeapons         : 2,
+      nbDefenseWeapons        : 1,
+      nbSpyTools              : 0,
+      nbSentryTools           : 0,
+      fortification           : "Camp (x 1)",
+      siegeTechnology         : "None (x 1)",
+    } ],
   ];
   htmlPaths.forEach(function(page){
     var htmlPath = page[0];
