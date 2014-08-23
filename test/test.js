@@ -25,7 +25,7 @@ describe('Parse Battlefield' , function() {
       var index = 0;
       result.forEach( function(player) {
         index++;
-        var requiredFields = ['userid','alliance','username','armySize','race','gold','rank'];
+        var requiredFields = ['userid','alliance','username','armySize','race','gold', 'goldText','rank'];
         requiredFields.forEach(function(requiredField) {
           it( "player #" + index.toString() + " should have '" + requiredField +"'", function() {
             return player.should.have.property(requiredField).that.is.not.undefined;
@@ -243,7 +243,7 @@ describe('Parse Left-Side Box' , function() {
       it('should be an object', function() {
         return result.should.be.an.object;
       });
-      ['username', 'fortification', 'gold', 'experience', 'turns', 'rank',
+      ['username', 'fortification', 'goldText', 'experience', 'turns', 'rank',
        'lastAttacked', 'mails' ].forEach( function(field) {
          it( "should have property '" + field + "'", function() {
            return result.should.have.property(field).that.is.not.empty;
@@ -255,6 +255,9 @@ describe('Parse Left-Side Box' , function() {
        });
        it( "should have property 'newMails' which is a boolean", function() {
          return result.should.have.property("newMails").that.is.a.boolean;
+       } );
+       it( "should have property 'gold' which is a number", function() {
+         return result.should.have.property("gold").that.is.a.number;
        } );
     });
   });
