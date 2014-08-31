@@ -775,3 +775,49 @@ describe('Parse Armory' , function() {
     });
   });
 });
+
+describe('Verify E-Mail', function() {
+  describe('#verification not a valid e-mail address', function() {
+    var localKoC = new KoC();
+    localKoC.setSession('abc');
+    var verifyPromise = localKoC.verifyEmail("not a valid email address");
+    it('should be fulfilled', function() {
+      return verifyPromise.should.be.fulfilled;
+    });
+    it('should have success field that is false', function() {
+      return verifyPromise.should.eventually.have.property("success").that.is.false;
+    });
+    it('should have error field that is not empty', function() {
+      return verifyPromise.should.eventually.have.property("error").that.is.not.empty;
+    });
+  });
+  describe('#verification not logged in', function() {
+    var localKoC = new KoC();
+    var verifyPromise = localKoC.verifyEmail("valid@email.com");
+    it('should be fulfilled', function() {
+      return verifyPromise.should.be.fulfilled;
+    });
+    it('should have success field that is false', function() {
+      return verifyPromise.should.eventually.have.property("success").that.is.false;
+    });
+    it('should have error field that is not empty', function() {
+      return verifyPromise.should.eventually.have.property("error").that.is.not.empty;
+    });
+  });
+  var cases = [
+    [ 'test/html/verify.html'            , ''                                                 ],
+    [ 'test/html/verify_email-taken.html', 'There is already a user with that e-mail address' ],
+    [ 'test/html/verify_email-sent.html' , ''                                                 ],
+  ];
+  cases.forEach(function(verifyCase){
+    var htmlPath = verifyCase[0];
+    var expectedErrorMessage = verifyCase[1];
+    describe('#local ' + htmlPath, function() {
+      var html   = fs.readFileSync(htmlPath, 'utf8');
+      var result = koc.parser.parseVerifyEmailError(html);
+      it("should be: '" + expectedErrorMessage + "'", function() {
+        return result.should.be.a('string').that.eql(expectedErrorMessage);
+      });
+    });
+  });
+});
