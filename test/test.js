@@ -243,7 +243,7 @@ describe('Parse Left-Side Box' , function() {
       it('should be an object', function() {
         return result.should.be.an.object;
       });
-      ['username', 'fortification', 'goldText', 'experience', 'turns', 'rank',
+      ['username', 'fortification', 'goldText', 'experienceText', 'turns', 'rank',
        'lastAttacked', 'mails' ].forEach( function(field) {
          it( "should have property '" + field + "'", function() {
            return result.should.have.property(field).that.is.not.empty;
@@ -258,6 +258,9 @@ describe('Parse Left-Side Box' , function() {
        } );
        it( "should have property 'gold' which is a number", function() {
          return result.should.have.property("gold").that.is.a.number;
+       } );
+       it( "should have property 'experience' which is a number", function() {
+         return result.should.have.property("experience").that.is.a.number;
        } );
     });
   });
@@ -669,7 +672,6 @@ describe('Parse Full User Stats' , function() {
   });
 });
 
-
 describe('Parse Armory' , function() {
   var htmlPaths = [
     // page                              , expected to be
@@ -817,6 +819,248 @@ describe('Verify E-Mail', function() {
       var result = koc.parser.parseVerifyEmailError(html);
       it("should be: '" + expectedErrorMessage + "'", function() {
         return result.should.be.a('string').that.eql(expectedErrorMessage);
+      });
+    });
+  });
+});
+
+describe('Parse Training' , function() {
+  var htmlPaths = [
+    // page                              , expected to be
+    [ 'test/html/train_first-time.html', {
+      message           : ""       ,
+      turing            : "hruen"  ,
+      totalFightingForce: 14       ,
+      trainingPrograms  : 6        ,
+      upgrades          :
+      [
+        {
+          currentTitle: 'Current Covert Skill',
+          upgradeName: 'Upgrade',
+          currentLevel: 'Level 0',
+          cost: '9,600 Gold (+60%)',
+          inputName: 'upgrade_spy',
+        },
+       {
+         title: 'Increase Conscription',
+         currentTitle: 'Current Conscription Rate',
+         upgradeName: 'Upgrade to 5 per day',
+         currentLevel: '0 soldiers per day',
+         cost: '3,000 Gold',
+         inputName: 'upgrade_prod',
+       },
+       {
+         title: 'Economic Development',
+         currentTitle: 'Current Economy',
+         upgradeName: 'Research Hunting (100 gold per turn)',
+         currentLevel: 'None (0 gold per turn)',
+         cost: '300 Experience',
+         inputName: 'upgrade_economy',
+       },
+       {
+         title: 'Technological Development',
+         currentTitle: 'Current Technologies',
+         upgradeName: 'Research!',
+         currentLevel: 'You have no technology',
+         cost: '300 Experience',
+         inputName: 'upgrade_tech',
+       }
+      ]
+    }],
+    [ 'test/html/train_no-technology.html', {
+      message           : ""       ,
+      turing            : "mbx"    ,
+      totalFightingForce: 106      ,
+      trainingPrograms  : 6        ,
+      upgrades          :
+      [
+        {
+          currentTitle: 'Current Covert Skill',
+          upgradeName: 'Upgrade',
+          currentLevel: 'Level 3',
+          cost: '39,300 Gold (+60%)',
+          inputName: 'upgrade_spy',
+        },
+       {
+         title: 'Increase Conscription',
+         currentTitle: 'Current Conscription Rate',
+         upgradeName: 'Upgrade to 5 per day',
+         currentLevel: '0 soldiers per day',
+         cost: '3,000 Gold',
+         inputName: 'upgrade_prod',
+       },
+       {
+         title: 'Economic Development',
+         currentTitle: 'Current Economy',
+         upgradeName: 'Research Hunting (100 gold per turn)',
+         currentLevel: 'None (0 gold per turn)',
+         cost: '300 Experience',
+         inputName: 'upgrade_economy',
+       },
+       {
+         title: 'Technological Development',
+         currentTitle: 'Current Technologies',
+         upgradeName: 'Research!',
+         currentLevel: 'You have no technology',
+         cost: '300 Experience',
+         inputName: 'upgrade_tech',
+       }
+      ]
+    }],
+    [ 'test/html/train_one-technology.html', {
+      message           : ""       ,
+      turing            : "chy"    ,
+      totalFightingForce: 109      ,
+      trainingPrograms  : 6        ,
+      upgrades          :
+      [
+        {
+          currentTitle: 'Current Covert Skill',
+          upgradeName: 'Upgrade',
+          currentLevel: 'Level 4',
+          cost: '62,900 Gold (+60%)',
+          inputName: 'upgrade_spy',
+        },
+       {
+         title: 'Increase Conscription',
+         currentTitle: 'Current Conscription Rate',
+         upgradeName: 'Upgrade to 5 per day',
+         currentLevel: '0 soldiers per day',
+         cost: '3,000 Gold',
+         inputName: 'upgrade_prod',
+       },
+       {
+         title: 'Economic Development',
+         currentTitle: 'Current Economy',
+         upgradeName: 'Research Hunting (100 gold per turn)',
+         currentLevel: 'None (0 gold per turn)',
+         cost: '300 Experience',
+         inputName: 'upgrade_economy',
+       },
+       {
+         title: 'Technological Development',
+         currentTitle: 'Current Technologies',
+         upgradeName: 'Research!',
+         currentLevel: 'Spear  (x 1.05 strength)',
+         cost: '350 Experience',
+         inputName: 'upgrade_tech',
+       }
+      ]
+    }],
+    [ 'test/html/train_two-technologies.html', {
+      message           : ""       ,
+      turing            : "chy"    ,
+      totalFightingForce: 109      ,
+      trainingPrograms  : 6        ,
+      upgrades          :
+      [
+        {
+          currentTitle: 'Current Covert Skill',
+          upgradeName: 'Upgrade',
+          currentLevel: 'Level 4',
+          cost: '62,900 Gold (+60%)',
+          inputName: 'upgrade_spy',
+        },
+       {
+         title: 'Increase Conscription',
+         currentTitle: 'Current Conscription Rate',
+         upgradeName: 'Upgrade to 5 per day',
+         currentLevel: '0 soldiers per day',
+         cost: '3,000 Gold',
+         inputName: 'upgrade_prod',
+       },
+       {
+         title: 'Economic Development',
+         currentTitle: 'Current Economy',
+         upgradeName: 'Research Hunting (100 gold per turn)',
+         currentLevel: 'None (0 gold per turn)',
+         cost: '300 Experience',
+         inputName: 'upgrade_economy',
+       },
+       {
+         title: 'Technological Development',
+         currentTitle: 'Current Technologies',
+         upgradeName: 'Research!',
+         currentLevel: 'Fire  (x 1.1 strength)',
+         cost: '400 Experience',
+         inputName: 'upgrade_tech',
+       }
+      ]
+    }],
+    [ 'test/html/train_three-technologies.html', {
+      message           : "You have researched Oven!",
+      turing            : "chy"    ,
+      totalFightingForce: 109      ,
+      trainingPrograms  : 6        ,
+      upgrades          :
+      [
+        {
+          currentTitle: 'Current Covert Skill',
+          upgradeName: 'Upgrade',
+          currentLevel: 'Level 4',
+          cost: '62,900 Gold (+60%)',
+          inputName: 'upgrade_spy',
+        },
+       {
+         title: 'Increase Conscription',
+         currentTitle: 'Current Conscription Rate',
+         upgradeName: 'Upgrade to 5 per day',
+         currentLevel: '0 soldiers per day',
+         cost: '3,000 Gold',
+         inputName: 'upgrade_prod',
+       },
+       {
+         title: 'Economic Development',
+         currentTitle: 'Current Economy',
+         upgradeName: 'Research Hunting (100 gold per turn)',
+         currentLevel: 'None (0 gold per turn)',
+         cost: '300 Experience',
+         inputName: 'upgrade_economy',
+       },
+       {
+         title: 'Technological Development',
+         currentTitle: 'Current Technologies',
+         upgradeName: 'Research!',
+         currentLevel: 'Oven  (x 1.16 strength)',
+         cost: '460 Experience',
+         inputName: 'upgrade_tech',
+       }
+      ]
+    }],
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath = page[0];
+    var expected = page[1];
+    describe('#local ' + htmlPath, function() {
+      var html   = fs.readFileSync(htmlPath, 'utf8');
+      var result = koc.parser.parseTraining(html);
+      it('should be an object', function() {
+        return result.should.be.an('object').that.contain.keys('personnel','train','upgrades','message','turing');
+      });
+      it('turing should be: ' + expected.turing, function() {
+        return result.should.be.an('object').that.has.property('turing').that.eql(expected.turing);
+      });
+      it('message should be: \'' + expected.message + "'", function() {
+        return result.should.be.an('object').that.has.property('message').that.eql(expected.message);
+      });
+      it( expected.upgrades.length + " upgrades", function() {
+        return result.should.be.an('object').that.has.property('upgrades').that.has.length(expected.upgrades.length);
+      });
+      it( expected.trainingPrograms + " training programs", function() {
+        return result.should.be.an('object').that.has.property('train').that.has.length(expected.trainingPrograms);
+      });
+      it('total fighting force: ' + expected.totalFightingForce, function() {
+        return result.should.be.an('object').that.has.property('personnel').that.has.property('Total Fighting Force').that.eql(expected.totalFightingForce);
+      });
+      var upgradeCount = 0;
+      expected.upgrades.forEach(function(upgrade) {
+        var actualUpgrade = result.upgrades[upgradeCount++];
+        var keys = Object.keys(upgrade);
+        keys.forEach(function(key) {
+          it( 'upgrade #' + upgradeCount + " " + key + ': ' + upgrade[key], function() {
+            return actualUpgrade.should.be.an('object').that.has.property(key).that.eql(upgrade[key]);
+          });
+        });
       });
     });
   });
