@@ -4,6 +4,7 @@ var chai           = require('chai'),
     chaiAsPromised = require("chai-as-promised"),
     fs             = require('fs'),
     KoC            = require('../lib/koc'),
+    helpers        = require('../lib/helpers'),
     koc            = new KoC();
 chai.use(chaiAsPromised);
 chai.should();
@@ -1059,6 +1060,134 @@ describe('Parse Training' , function() {
         keys.forEach(function(key) {
           it( 'upgrade #' + upgradeCount + " " + key + ': ' + upgrade[key], function() {
             return actualUpgrade.should.be.an('object').that.has.property(key).that.eql(upgrade[key]);
+          });
+        });
+      });
+    });
+  });
+});
+
+describe('Test Quantity From String', function() {
+  var cases = [
+    // input        , default  , output
+    [ "5,000"       , undefined,  5000 ],
+    [ "abc"         , undefined, "abc" ],
+    [ "None"        ,         0,     0 ],
+    [ "<1,87^"      , undefined,   187 ],
+    [ "-100"        , undefined,  -100 ],
+    [ "one777two888", undefined,   777 ],
+  ];
+  cases.forEach(function(currentCase){
+    it("helpers.quantityFromString('"+currentCase[0]+"',"+currentCase[1]+") == " + currentCase[2], function(){
+      helpers.quantityFromString(currentCase[0],currentCase[1]).should.eql(currentCase[2]);
+    });
+  });
+});
+
+describe('Parse Mercenaries' , function() {
+  var htmlPaths = [
+    // page                              , expected to be
+    [ 'test/html/mercs_first-time.html', {
+      message           : ""    ,
+      turing            : "gnv" ,
+      totalFightingForce: 115   ,
+      trainingPrograms  : 6     ,
+      hire:
+      [
+        {
+          mercenaryType: 'Attack Specialist',
+          costPerUnitText: '4,500 Gold',
+          costPerUnit: 4500,
+          quantityAvailableText: 'None',
+          quantityAvailable: 0,
+          inputName: 'mercs[attack]',
+          inputValue: 0,
+        },
+        {
+          mercenaryType: 'Defense Specialist',
+          costPerUnitText: '4,500 Gold',
+          costPerUnit: 4500,
+          quantityAvailableText: 'None',
+          quantityAvailable: 0,
+          inputName: 'mercs[defend]',
+          inputValue: 0,
+        },
+        {
+          mercenaryType: 'Untrained',
+          costPerUnitText: '3,500 Gold',
+          costPerUnit: 3500,
+          quantityAvailableText: 'None',
+          quantityAvailable: 0,
+          inputName: 'mercs[general]',
+          inputValue: 0,
+        }
+      ]
+    }],
+    [ 'test/html/mercs_defense-only.html', {
+      message           : ""    ,
+      turing            : "wjre",
+      totalFightingForce: 56    ,
+      trainingPrograms  : 6     ,
+      hire:
+      [
+        {
+          mercenaryType: 'Attack Specialist',
+          costPerUnitText: '4,500 Gold',
+          costPerUnit: 4500,
+          quantityAvailableText: 'None',
+          quantityAvailable: 0,
+          inputName: 'mercs[attack]',
+          inputValue: 0,
+        },
+        {
+          mercenaryType: 'Defense Specialist',
+          costPerUnitText: '4,500 Gold',
+          costPerUnit: 4500,
+          quantityAvailableText: '11',
+          quantityAvailable: 11,
+          inputName: 'mercs[defend]',
+          inputValue: 0,
+        },
+        {
+          mercenaryType: 'Untrained',
+          costPerUnitText: '3,500 Gold',
+          costPerUnit: 3500,
+          quantityAvailableText: 'None',
+          quantityAvailable: 0,
+          inputName: 'mercs[general]',
+          inputValue: 0,
+        }
+      ]
+    }],
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath = page[0];
+    var expected = page[1];
+    describe('#local ' + htmlPath, function() {
+      var html   = fs.readFileSync(htmlPath, 'utf8');
+      var result = koc.parser.parseMercenaries(html);
+      it('should be an object', function() {
+        return result.should.be.an('object').that.contain.keys('personnel','hire','message','turing');
+      });
+      it('turing should be: ' + expected.turing, function() {
+        return result.should.be.an('object').that.has.property('turing').that.eql(expected.turing);
+      });
+      it('message should be: \'' + expected.message + "'", function() {
+        return result.should.be.an('object').that.has.property('message').that.eql(expected.message);
+      });
+      it( expected.hire.length + " mercenary tpes", function() {
+        return result.should.be.an('object').that.has.property('hire').that.has.length(expected.hire.length);
+      });
+      it('total fighting force: ' + expected.totalFightingForce, function() {
+        return result.should.be.an('object').that.has.property('personnel').that.has.property('Total Fighting Force').that.eql(expected.totalFightingForce);
+      });
+      var hireCount = 0;
+      expected.hire.forEach(function(hire) {
+        var actualHire = result.hire[hireCount++];
+        var keys = Object.keys(hire);
+        keys.forEach(function(key) {
+          it( 'hire #' + hireCount + " " + key + ': ' + hire[key], function() {
+            return actualHire.should.be.an('object').that.has.property(key).that.eql(hire[key]);
           });
         });
       });
