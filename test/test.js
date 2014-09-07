@@ -1036,7 +1036,7 @@ describe('Parse Training' , function() {
       var html   = fs.readFileSync(htmlPath, 'utf8');
       var result = koc.parser.parseTraining(html);
       it('should be an object', function() {
-        return result.should.be.an('object').that.contain.keys('personnel','train','upgrades','message','turing');
+        return result.should.be.an('object').that.contain.keys('success','personnel','train','upgrades','message','turing');
       });
       it('turing should be: ' + expected.turing, function() {
         return result.should.be.an('object').that.has.property('turing').that.eql(expected.turing);
@@ -1167,7 +1167,7 @@ describe('Parse Mercenaries' , function() {
       var html   = fs.readFileSync(htmlPath, 'utf8');
       var result = koc.parser.parseMercenaries(html);
       it('should be an object', function() {
-        return result.should.be.an('object').that.contain.keys('personnel','hire','message','turing');
+        return result.should.be.an('object').that.contain.keys('success','personnel','hire','message','turing');
       });
       it('turing should be: ' + expected.turing, function() {
         return result.should.be.an('object').that.has.property('turing').that.eql(expected.turing);
