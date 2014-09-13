@@ -1194,3 +1194,100 @@ describe('Parse Mercenaries' , function() {
     });
   });
 });
+
+describe('Parse Recruit' , function() {
+  var htmlPaths = [
+    // page                              , expected to be
+    [ 'test/html/recruit_first-time.html',
+      {
+        success: true,
+        image: '/ads/recruit.img?313568&uniqid=vqr4na2u',
+        morale: '0',
+        hiddenFields: {
+          iuniqid: '1f8097b1f1a2c611c13ea7c54df5a8d1',
+          uniqid: 'vqr4na2u',
+        },
+        "recruitPreferences":
+        [
+          {
+            "checked": false,
+            "name": "Only Me",
+            "value": "1",
+          },
+          {
+            "checked": false,
+            "name": "Friends",
+            "value": "2",
+          },
+          {
+            "checked": true,
+            "name": "Anyone",
+            "value": "4",
+          }
+        ],
+        "recruitPreferencesInputName": "clickPref",
+        "fieldName": "image_click_value",
+      }
+    ],
+    [ 'test/html/recruit_01.html',
+      {
+        success: true,
+        image: '/ads/recruit.img?a37867&uniqid=4p1tq6gt',
+        morale: '-100',
+        hiddenFields: {
+          iuniqid: 'e1ee70ae2b1f5d644d175a5fdf889632',
+          uniqid: '4p1tq6gt',
+        },
+        "recruitPreferences":
+        [
+          {
+            "checked": false,
+            "name": "Only Me",
+            "value": "1",
+          },
+          {
+            "checked": false,
+            "name": "Friends",
+            "value": "2",
+          },
+          {
+            "checked": true,
+            "name": "Anyone",
+            "value": "4",
+          }
+        ],
+        "recruitPreferencesInputName": "clickPref",
+        "fieldName": "image_click_value",
+      }
+    ],
+    [ "test/html/recruit_invalid_01.html",
+      {
+        success: false,
+        error: 'Invalid Selection',
+        challenge_url: 'http://api.recaptcha.net/challenge?k=6LcvaQQAAAAAACnjh5psIedbdyYzGDb0COW82ruo',
+        recruitPreferences:
+         [ { name: 'Only Me', value: '1', checked: false },
+           { name: 'Anyone', value: '4', checked: true } ],
+        recruitPreferencesInputName: 'clickPref',
+        challengeField: 'recaptcha_challenge_field',
+        challengeResponseField: 'recaptcha_response_field',
+        hiddenFields: {
+          recaptcha_response_field: "manual_challenge",
+          uniqid: "ab1cd2ef",
+        },
+      }
+    ],
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath = page[0];
+    var expected = page[1];
+    describe('#local ' + htmlPath, function() {
+      var html   = fs.readFileSync(htmlPath, 'utf8');
+      var result = koc.parser.parseRecruit(html);
+      it('should be as expected', function() {
+        return result.should.be.an('object').that.eql(expected);
+      });
+    });
+  });
+});
+
