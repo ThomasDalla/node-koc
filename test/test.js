@@ -1291,3 +1291,53 @@ describe('Parse Recruit' , function() {
   });
 });
 
+describe('Parse Attack Log' , function() {
+  var htmlPaths = [
+    // page                                , on you, total, current, max, by you, total, current, max
+    [ 'test/html/attacklog_first-time.html',      3,     3,       1,   1,     10,    11,       1,   2 ],
+    [ 'test/html/attacklog_no-by-you.html' ,     10,    15,       1,   2,      0,     0,       1,   1 ],
+    [ 'test/html/attacklog_xhr.html'       ,      5,    15,       2,   2,      1,     1,       1,   1 ],
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath     = page[0];
+    var onYou        = page[1];
+    var onYouTotal   = page[2];
+    var onYouCurrent = page[3];
+    var onYouMax     = page[4];
+    var byYou        = page[5];
+    var byYouTotal   = page[6];
+    var byYouCurrent = page[7];
+    var byYouMax     = page[8];
+    describe('#local ' + htmlPath, function() {
+      var html     = fs.readFileSync(htmlPath, 'utf8');
+      var result   = koc.parser.parseAttackLog(html);
+      //console.log(result);
+      it('should be an object', function() {
+        return result.should.be.an('object');
+      });
+      it('should have success==true', function() {
+        return result.should.have.property('success').that.is.true;
+      });
+      it('should have ' + onYou + ' attacks on you', function() {
+        return result.should.have.property('attacksOnYou').that.has.property('attacks').that.has.length(onYou);
+      });
+      it('should have ' + byYou + ' attacks by you', function() {
+        return result.should.have.property('attacksByYou').that.has.property('attacks').that.has.length(byYou);
+      });
+      it('should have ' + onYouTotal + ' total attacks on you', function() {
+        return result.should.have.property('attacksOnYou').that.has.property('total').that.eql(onYouTotal);
+      });
+      it('should have ' + byYouTotal + ' total attacks by you', function() {
+        return result.should.have.property('attacksByYou').that.has.property('total').that.eql(byYouTotal);
+      });
+      it('attacks on you should be on page ' + onYouCurrent + ' / ' + onYouMax, function() {
+        result.should.have.property('attacksOnYou').that.has.property('currentPage').that.eql(onYouCurrent);
+        result.should.have.property('attacksOnYou').that.has.property('maxPage').that.eql(onYouMax);
+      });
+      it('attacks by you should be on page ' + byYouCurrent + ' / ' + byYouMax, function() {
+        result.should.have.property('attacksByYou').that.has.property('currentPage').that.eql(byYouCurrent);
+        result.should.have.property('attacksByYou').that.has.property('maxPage').that.eql(byYouMax);
+      });
+    });
+  });
+});
