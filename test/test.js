@@ -11,27 +11,48 @@ chai.should();
 
 describe('Parse Battlefield' , function() {
   var htmlPaths = [
-    'test/html/battlefield_full_logged-out.html',
-    'test/html/battlefield_xhr_logged-out.html',
-    'test/html/battlefield_xhr_logged-in.html',
-    'test/html/battlefield_full_first-login.html'
+    // htmlPath                                    , loggedIn, # , total, current, max
+    [ 'test/html/battlefield_full_logged-out.html' , false   , 20,  2110,       1, 106 ],
+    [ 'test/html/battlefield_xhr_logged-out.html'  , false   , 20,  2108,       2, 106 ],
+    [ 'test/html/battlefield_xhr_logged-in.html'   , true    , 20,  2088,     103, 105 ],
+    [ 'test/html/battlefield_full_first-login.html', true    , 20,  2093,     100, 105 ],
+    [ 'test/html/battlefield_xhr_02.html'          , true    , 20,  1877,      83,  94 ],
+    [ 'test/html/battlefield_xhr_03.html'          , true    , 20,  1877,      84,  94 ],
+    [ 'test/html/battlefield_xhr_04.html'          , true    , 20,  1881,      84,  95 ],
+    [ 'test/html/battlefield_xhr_05.html'          , true    , 20,  1882,      76,  95 ],
   ];
-  htmlPaths.forEach( function(htmlPath) {
+  htmlPaths.forEach( function(currentCase) {
+    var htmlPath     = currentCase[0];
+    var loggedIn     = currentCase[1];
+    var recordsNb    = currentCase[2];
+    var totalPlayers = currentCase[3];
+    var currentPage  = currentCase[4];
+    var maxPage      = currentCase[5];
     describe('#' + htmlPath, function() {
       var html     = fs.readFileSync(htmlPath, 'utf8');
       var result   = koc.parser.parseBattlefield(html);
-      it('should return 20 records', function() {
-        return result.length.should.equal(20);
+      it('should return '+ recordsNb  + ' players', function() {
+        return result.should.have.property('players').that.has.length(recordsNb);
       });
       var index = 0;
-      result.forEach( function(player) {
+      result.players.forEach( function(player) {
         index++;
-        var requiredFields = ['userid','alliance','username','armySize','race','gold', 'goldText','rank'];
+        var requiredFields = ['userid','alliance','username','armySize','armySizeText','race','gold','goldText','rank','rankText'];
         requiredFields.forEach(function(requiredField) {
           it( "player #" + index.toString() + " should have '" + requiredField +"'", function() {
             return player.should.have.property(requiredField).that.is.not.undefined;
           });
         });
+      });
+      it( 'loggedIn should be: '+ loggedIn, function() {
+        return result.should.have.property('loggedIn').that.eql(loggedIn);
+      });
+      it( 'should have '+ totalPlayers + ' total players', function() {
+        return result.should.have.property('playersTotal').that.eql(totalPlayers);
+      });
+      it('should be on page ' + currentPage + ' / ' + maxPage + ' of the battlefield', function() {
+        result.should.have.property('currentPage').that.eql(currentPage);
+        result.should.have.property('maxPage').that.eql(maxPage);
       });
     } );
   } );
