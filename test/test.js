@@ -1341,3 +1341,54 @@ describe('Parse Attack Log' , function() {
     });
   });
 });
+
+describe('Parse Intelligence' , function() {
+  var htmlPaths = [
+    // page                              intercepted, total, current, max, files, total, current, max
+    [ 'test/html/intel_first-time.html',           0,     0,       1,   1,     2,     2,       1,   1 ],
+    [ 'test/html/intel_01.html'        ,           5,     5,       1,   1,     2,     2,       1,   1 ],
+    [ 'test/html/intel_02.html'        ,           8,     8,       1,   1,    10,    11,       1,   2 ],
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath     = page[0];
+    var intercepted        = page[1];
+    var interceptedTotal   = page[2];
+    var interceptedCurrent = page[3];
+    var interceptedMax     = page[4];
+    var files        = page[5];
+    var filesTotal   = page[6];
+    var filesCurrent = page[7];
+    var filesuMax     = page[8];
+    describe('#local ' + htmlPath, function() {
+      var html     = fs.readFileSync(htmlPath, 'utf8');
+      var result   = koc.parser.parseIntelligence(html);
+      //console.log(result);
+      it('should be an object', function() {
+        return result.should.be.an('object');
+      });
+      it('should have success==true', function() {
+        return result.should.have.property('success').that.is.true;
+      });
+      it('should have intercepted ' + intercepted + ' operations', function() {
+        return result.should.have.property('intercepted').that.has.property('operations').that.has.length(intercepted);
+      });
+      it('should have ' + files + ' reports by you', function() {
+        return result.should.have.property('files').that.has.property('reports').that.has.length(files);
+      });
+      it('should have intercepted ' + interceptedTotal + ' total operations on you', function() {
+        return result.should.have.property('intercepted').that.has.property('total').that.eql(interceptedTotal);
+      });
+      it('should have ' + filesTotal + ' total reports by you', function() {
+        return result.should.have.property('files').that.has.property('total').that.eql(filesTotal);
+      });
+      it('should be on page ' + interceptedCurrent + ' / ' + interceptedMax + ' of intercepted operations', function() {
+        result.should.have.property('intercepted').that.has.property('currentPage').that.eql(interceptedCurrent);
+        result.should.have.property('intercepted').that.has.property('maxPage').that.eql(interceptedMax);
+      });
+      it('should be on page ' + filesCurrent + ' / ' + filesuMax + ' of your reports', function() {
+        result.should.have.property('files').that.has.property('currentPage').that.eql(filesCurrent);
+        result.should.have.property('files').that.has.property('maxPage').that.eql(filesuMax);
+      });
+    });
+  });
+});
