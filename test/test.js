@@ -140,7 +140,7 @@ describe('Parse Base' , function() {
       var result   = koc.parser.parseBase(html);
       //console.log(result);
       it('should be an object', function() {
-        return result.should.be.an.object;
+        return result.should.be.an('object');
       });
       var requiredFields = [
         [ 'userInfo',
@@ -263,7 +263,7 @@ describe('Parse Left-Side Box' , function() {
       var result   = koc.parser.parseLeftSideBox(html);
       //console.log(result);
       it('should be an object', function() {
-        return result.should.be.an.object;
+        return result.should.be.an('object');
       });
       ['username', 'fortification', 'goldText', 'experienceText', 'turns', 'rank',
        'lastAttacked', 'mails' ].forEach( function(field) {
@@ -276,14 +276,16 @@ describe('Parse Left-Side Box' , function() {
            } );
        });
        it( "should have property 'newMails' which is a boolean", function() {
-         return result.should.have.property("newMails").that.is.a.boolean;
+         return result.should.have.property("newMails").that.is.a('boolean');
        } );
-       it( "should have property 'gold' which is a number", function() {
-         return result.should.have.property("gold").that.is.a.number;
-       } );
-       it( "should have property 'experience' which is a number", function() {
-         return result.should.have.property("experience").that.is.a.number;
-       } );
+       if(hasBox) {
+         it( "should have property 'gold' which is a number", function() {
+           return result.should.have.property("gold").that.is.a('number');
+         } );
+         it( "should have property 'experience' which is a number", function() {
+           return result.should.have.property("experience").that.is.a('number');
+         } );
+       }
     });
   });
 });
@@ -547,7 +549,7 @@ describe('Test Help', function() {
   if( help.length>0) {
     var gameplay = help[0];
     it( "the first item should have title 'Gameplay'", function() {
-      return gameplay.should.be.an('object').that.has.property('title').that.deep.eql('Gameplay');
+      return gameplay.should.be.an('object').that.has.property('title').that.eql('Gameplay');
     } );
     it( "the first item should have 5 sections", function() {
       return gameplay.should.be.an('object').that.has.property('sections').that.has.length(6);
@@ -555,10 +557,10 @@ describe('Test Help', function() {
     var i=0;
     help.forEach( function(helpRootItem){
       it( "item "+ i + " should have 'title', 'help' and 'sections'", function() {
-        return gameplay.should.be.an('object').that.has.keys('sections', 'help', 'title');
+        return helpRootItem.should.be.an('object').that.has.keys('sections', 'help', 'title');
       } );
       it( "item "+ i + " should have non-empty 'title'", function() {
-        return gameplay.should.be.an('object').that.have.property('title').that.is.not.empty;
+        return helpRootItem.should.be.an('object').that.have.property('title').that.is.not.empty;
       } );
       i++;
     });
@@ -1414,6 +1416,23 @@ describe('Parse Intelligence' , function() {
   });
 });
 
-
 // TODO: Test detail_01.html 2745 length
 //                   02      3114
+describe('Parse Battle Report' , function() {
+  var htmlPaths = [
+    // page                               length
+    [ 'test/html/detail_01.html'         , 2745 ],
+    [ 'test/html/detail_02_suspense.html', 3114 ],
+  ];
+  htmlPaths.forEach(function(page){
+    var htmlPath       = page[0];
+    var expectedLength = page[1];
+    describe('#local ' + htmlPath, function() {
+      var html     = fs.readFileSync(htmlPath, 'utf8');
+      var result   = koc.parser.parseBattleReport(html);
+      it('should have length ' + expectedLength, function() {
+        result.should.have.property('report').that.has.length(expectedLength);
+      });
+    });
+  });
+});
