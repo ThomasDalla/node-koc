@@ -322,7 +322,7 @@ describe('Parse Races Information', function() {
 describe('Parse New User Advisor' , function() {
   var htmlPaths = [
     // page                                        , has it,     expected to contain
-    [ 'test/html/alliances_first-time.html'        , true, 'Alliances allow players to work together'　　　　　　　　　　],
+    [ 'test/html/alliances_first-time.html'        , true, 'Alliances allow players to work together'                    ],
     [ 'test/html/armory_first-time.html'           , true, 'status of your weapons and tools'                            ],
     [ 'test/html/attacklog_first-time.html'        , true, 'record of all incoming and outgoing attacks'                 ],
     [ 'test/html/base_first-login.html'            , true, 'This is your Command Center'                                 ],
@@ -373,7 +373,7 @@ describe('Parse New User Advisor' , function() {
 describe('Parse Error' , function() {
   var htmlPaths = [
     // page                              , expected to be
-    [ 'test/html/error_please-login.html', 'Please login to view that page.'                           　　　　　　　　　　],
+    [ 'test/html/error_please-login.html', 'Please login to view that page.'                                               ],
     [ 'test/html/error_cookies.html'     , 'An unknown error has occurred. Please check to make sure cookies are enabled.' ],
   ];
   htmlPaths.forEach(function(page){
