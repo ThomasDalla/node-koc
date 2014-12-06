@@ -1360,8 +1360,8 @@ describe('Parse Intelligence', function () {
   var htmlPaths = [
     // page                              intercepted, total, current, max, files, total, current, max
     ['test/html/intel_first-time.html', 0, 0, 1, 1, 2, 2, 1, 1],
-    ['test/html/intel_01.html', 5, 5, 1, 1, 2, 2, 1, 1],
-    ['test/html/intel_02.html', 8, 8, 1, 1, 10, 11, 1, 2],
+    ['test/html/intel_01.html'        , 5, 5, 1, 1, 2, 2, 1, 1],
+    ['test/html/intel_02.html'        , 8, 8, 1, 1, 10, 11, 1, 2],
   ];
   htmlPaths.forEach(function (page) {
     var htmlPath = page[0];
@@ -1410,8 +1410,8 @@ describe('Parse Intelligence', function () {
 describe('Parse Battle Report', function () {
   var htmlPaths = [
     // page                               length
-    ['test/html/detail_01.html', 2745],
-    ['test/html/detail_02_suspense.html', 3114],
+    ['test/html/detail_01.html'         , 2821],
+    ['test/html/detail_02_suspense.html', 3198],
   ];
   htmlPaths.forEach(function (page) {
     var htmlPath = page[0];
@@ -1512,9 +1512,9 @@ describe('Parse Intel File', function () {
 describe('Parse Intel Detail', function () {
   var htmlPaths = [
     // page                       success, total soldiers,      SA,    gold, # of weapons, story
-    ['test/html/inteldetail_01.html'        , true , 2660,  139142, 4590655,   12, [ 'sneaks into AusGamer\'s camp', 'provides you with the information gathered' ] ],
-    ['test/html/inteldetail_02.html'        , true , 1510, 6629289, 7446987,    4, [ 'sneaks into VANISH\'s camp', 'provides you with the information gathered' ] ],
-    ['test/html/inteldetail_03_aborted.html', false, null,    null,    null, null, [ 'sneaks into tomptanker\'s camp', 'you will need a more powerful force' ] ],
+    ['test/html/inteldetail_01.html', true, 2660, 139142, 4590655, 12, ['sneaks into AusGamer\'s camp', 'provides you with the information gathered']],
+    ['test/html/inteldetail_02.html', true, 1510, 6629289, 7446987, 4, ['sneaks into VANISH\'s camp', 'provides you with the information gathered']],
+    ['test/html/inteldetail_03_aborted.html', false, null, null, null, null, ['sneaks into tomptanker\'s camp', 'you will need a more powerful force']],
   ];
   htmlPaths.forEach(function (page) {
     var htmlPath = page[0];
@@ -1534,22 +1534,22 @@ describe('Parse Intel Detail', function () {
       it('should have success==' + expectedSuccess, function () {
         return result.should.have.property('success').that.eql(expectedSuccess);
       });
-      if( expectedSuccess && result.success === true ) {
+      if (expectedSuccess && result.success === true) {
         it('should have ' + expectedTotalSoldiers + " total soldiers", function () {
-          if( result.should.have.property('army')
+          if (result.should.have.property('army')
               .that.is.an('object')
-              .that.has.keys( 'soldiers', 'mercenaries') ) {
-            var actualTotalSoldiers = helpers.quantityFromString(result.army.soldiers.attack,0)
-              + helpers.quantityFromString(result.army.soldiers.defense,0)
-              + helpers.quantityFromString(result.army.soldiers.untrained,0)
-              + helpers.quantityFromString(result.army.mercenaries.attack,0)
-              + helpers.quantityFromString(result.army.mercenaries.defense,0)
-              + helpers.quantityFromString(result.army.mercenaries.untrained,0);
+              .that.has.keys('soldiers', 'mercenaries')) {
+            var actualTotalSoldiers = helpers.quantityFromString(result.army.soldiers.attack, 0)
+              + helpers.quantityFromString(result.army.soldiers.defense, 0)
+              + helpers.quantityFromString(result.army.soldiers.untrained, 0)
+              + helpers.quantityFromString(result.army.mercenaries.attack, 0)
+              + helpers.quantityFromString(result.army.mercenaries.defense, 0)
+              + helpers.quantityFromString(result.army.mercenaries.untrained, 0);
             return actualTotalSoldiers.should.eql(expectedTotalSoldiers);
           }
         });
         it('should have SA==' + expectedStrikeAction, function () {
-          if(result.should.have.property('stats').that.is.an('array').of.length(9)){
+          if (result.should.have.property('stats').that.is.an('array').of.length(9)) {
             result.stats[0].value.should.eql(expectedStrikeAction);
           }
         });
@@ -1560,7 +1560,7 @@ describe('Parse Intel Detail', function () {
           result.should.have.property('weapons').that.is.an('array').of.length(expectedNumberOfWeapons);
         });
       }
-      expectedStories.forEach(function(expectedStory){
+      expectedStories.forEach(function (expectedStory) {
         it('Story should contain "' + expectedStory + '"', function () {
           result.should.have.property('story').that.contain(expectedStory);
         });

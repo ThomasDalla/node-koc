@@ -1,4 +1,31 @@
-// Libs
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: koc.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: koc.js</h1>
+
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Libs
 var Q = require('q');
 var request = Q.denodeify(require('request'));
 var util = require("util");
@@ -34,7 +61,7 @@ var koc = function (session) {
  * @param {String} new_cookie_name
  */
 koc.prototype.setKoCSessionCookieName = function (new_cookie_name) {
-  if (new_cookie_name !== undefined && new_cookie_name.length)
+  if (new_cookie_name !== undefined &amp;&amp; new_cookie_name.length)
     this.koc_session_cookie_name = new_cookie_name;
 };
 
@@ -51,7 +78,7 @@ koc.prototype.getKoCSessionCookieName = function () {
  * @param {String} new_koc_host
  */
 koc.prototype.setKoCHost = function (new_koc_host) {
-  if (new_koc_host !== undefined && new_koc_host.length)
+  if (new_koc_host !== undefined &amp;&amp; new_koc_host.length)
     this.koc_host = new_koc_host;
 };
 
@@ -68,7 +95,7 @@ koc.prototype.getKoCHost = function () {
  * @param {String} new_koc_recaptcha_url
  */
 koc.prototype.setKoCReCaptchaUrl = function (new_koc_recaptcha_url) {
-  if (new_koc_recaptcha_url !== undefined && new_koc_recaptcha_url !== null && new_koc_recaptcha_url.length)
+  if (new_koc_recaptcha_url !== undefined &amp;&amp; new_koc_recaptcha_url !== null &amp;&amp; new_koc_recaptcha_url.length)
     this.koc_recaptcha_url = new_koc_recaptcha_url;
 };
 
@@ -95,7 +122,7 @@ koc.prototype.getRecaptchaImage = function (server, challenge) {
  * @param {String} new_recaptcha_image_format
  */
 koc.prototype.setReCaptchaImageFormat = function (new_recaptcha_image_format) {
-  if (new_recaptcha_image_format !== undefined && new_recaptcha_image_format.length)
+  if (new_recaptcha_image_format !== undefined &amp;&amp; new_recaptcha_image_format.length)
     this.recaptcha_image_format = new_recaptcha_image_format;
 };
 
@@ -112,7 +139,7 @@ koc.prototype.getReCaptchaImageFormat = function () {
  * @param {String} new_session new session id to set
  */
 koc.prototype.setSession = function (new_session) {
-  if (new_session !== undefined && new_session.length)
+  if (new_session !== undefined &amp;&amp; new_session.length)
     this.session = new_session;
 };
 
@@ -130,7 +157,7 @@ koc.prototype.getSession = function () {
  */
 koc.prototype.hasSession = function () {
   var session = this.getSession();
-  return session !== undefined && session.length;
+  return session !== undefined &amp;&amp; session.length;
 };
 
 /**
@@ -146,9 +173,9 @@ koc.prototype.prepareResponse = function (response) {
     response.help = this.help;
   // The verify and error pages notably doesn't show the username and fortification in the title
   // Check and get it from the last known username instead
-  if (this.stats.username !== undefined && this.stats.username.indexOf(" ") >= 0)
+  if (this.stats.username !== undefined &amp;&amp; this.stats.username.indexOf(" ") >= 0)
     this.stats.username = this.username;
-  if (this.stats.fortification !== undefined && this.stats.fortification.indexOf(",") >= 0)
+  if (this.stats.fortification !== undefined &amp;&amp; this.stats.fortification.indexOf(",") >= 0)
     this.stats.fortification = "???";
   if (response.error === undefined)
     response.error = "";
@@ -164,7 +191,7 @@ koc.prototype.getDefaultCommanderChangeStatement = function () {
 };
 
 koc.prototype.setDefaultCommanderChangeStatement = function (new_value) {
-  if (new_value !== undefined && new_value.length)
+  if (new_value !== undefined &amp;&amp; new_value.length)
     this.default_commander_change_statement = new_value;
 };
 
@@ -181,7 +208,7 @@ koc.prototype.setDefaultCommanderChangeStatement = function (new_value) {
  */
 koc.prototype.getRequestOptions = function (method, page, params, xhr) {
   var koc_session = "";
-  if (this.getSession() !== undefined && this.getSession().length > 0) {
+  if (this.getSession() !== undefined &amp;&amp; this.getSession().length > 0) {
     koc_session = " " + this.getKoCSessionCookieName() + "=" + this.getSession();
   }
   var options = {
@@ -203,7 +230,7 @@ koc.prototype.getRequestOptions = function (method, page, params, xhr) {
     // no encoding
     options.encoding = null;
   }
-  if (params !== undefined && params !== null)
+  if (params !== undefined &amp;&amp; params !== null)
     if (method == "GET")
       options.qs = params;
     else
@@ -219,7 +246,7 @@ koc.prototype.updateKocSession = function (headers) {
   if (headers === undefined) return;
   var setCookie = headers['set-cookie'];
   var _koc = this;
-  if (setCookie !== undefined && setCookie.length > 0) {
+  if (setCookie !== undefined &amp;&amp; setCookie.length > 0) {
     setCookie.forEach(function (cookieString) {
       var cookie = cookieString.split(';')[0];
       var cookieSplit = cookie.split('=');
@@ -240,14 +267,14 @@ koc.prototype.updateKocSession = function (headers) {
 koc.prototype.createRequestPromise = function (options, onSuccess) {
   var _koc = this;
   // Don't catch verify as an error if that's what we asked for!
-  var catchVerify = options.url.indexOf("verify") == -1 && options.url.indexOf("signup") == -1;
+  var catchVerify = options.url.indexOf("verify") == -1 &amp;&amp; options.url.indexOf("signup") == -1;
   return request(options)
     .then(function (res) {
       var response = res[0];
       var body = res[1];
       _koc.location = response.request.path;
       // If not XHR, nor an image, try to parse some more information
-      if (options.headers["X-Requested-With"] === undefined && options.url.indexOf("recruit.img") < 0) {
+      if (options.headers["X-Requested-With"] === undefined &amp;&amp; options.url.indexOf("recruit.img") &lt; 0) {
         _koc.stats = _koc.parser.parseLeftSideBox(body);
         _koc.help = _koc.parser.parseNewUserAdvisor(body);
         _koc.age = _koc.parser.guessAge(body);
@@ -273,7 +300,7 @@ koc.prototype.createRequestPromise = function (options, onSuccess) {
           error: _koc.parser.parseBannedMessage(body)
         });
       }
-      if (catchVerify && response.request.path == "/verify.php") {
+      if (catchVerify &amp;&amp; response.request.path == "/verify.php") {
         return _koc.prepareResponse({
           success: false,
           error: "You must verify your account (e-mail) before you can play Kings of Chaos"
@@ -303,7 +330,7 @@ koc.prototype.createRequestPromise = function (options, onSuccess) {
 koc.prototype.requestPage = function (mustBeLoggedIn, method, page, params, onSuccess, xhr) {
   // Check if we need to be logged in
   var _koc = this;
-  if (mustBeLoggedIn && !_koc.hasSession()) {
+  if (mustBeLoggedIn &amp;&amp; !_koc.hasSession()) {
     return Q(_koc.prepareResponse({
       success: false,
       error: "You must be logged in to retrieve " + page,
@@ -311,7 +338,7 @@ koc.prototype.requestPage = function (mustBeLoggedIn, method, page, params, onSu
     }));
   }
   _koc.location = "/" + page;
-  if (params !== undefined && params !== null && params.usrname !== undefined)
+  if (params !== undefined &amp;&amp; params !== null &amp;&amp; params.usrname !== undefined)
     _koc.username = params.usrname;
   // If no koc_session, need to request one first
   if (_koc.getSession() === undefined || !_koc.getSession().length) {
@@ -385,7 +412,7 @@ koc.prototype.getReCaptchaChallenge = function () {
         });
       }
       var body = result[1];
-      // get the challenge & server
+      // get the challenge &amp; server
       var reChallenge = /challenge\s*:\s*'([^']+)',/gmi;
       var reServer = /server\s*:\s*'([^']+)',/gmi;
       var mChallenge = reChallenge.exec(body);
@@ -443,7 +470,7 @@ koc.prototype.register = function (race, username, password, email, challenge, c
     }));
   }
   return this.verify(username, password, password).then(function (result) {
-    if (!result.success || (!result.username.length && !result.password.length)) {
+    if (!result.success || (!result.username.length &amp;&amp; !result.password.length)) {
       // we need a turing
       return _koc.requestPage(false, "GET", "index.php", null, function (response, body) {
         // get the turing
@@ -520,7 +547,7 @@ koc.prototype.verify = function (username, password, password2) {
   }, function (response, body) {
     try {
       var result = JSON.parse(body);
-      result.success = result.username !== undefined && result.password !== undefined;
+      result.success = result.username !== undefined &amp;&amp; result.password !== undefined;
       return _koc.prepareResponse(result);
     } catch (e) {
       return _koc.prepareResponse({
@@ -634,7 +661,7 @@ koc.prototype.getLeftMenuInfo = function () {
       return _koc.prepareResponse({
         success: true,
         user: _koc.parser.parseBase(body),
-        menu: _koc.parser.parseMenu(body),
+        menu: _koc.parser.parseMenu()
       });
     });
 };
@@ -709,12 +736,12 @@ koc.prototype.getHelp = function () {
 
 koc.prototype.forgotPass = function (username, email) {
   var _koc = this;
-  if (( username === undefined || username === null || !username.length ) && ( email === undefined || email === null || !email.length ))
+  if (( username === undefined || username === null || !username.length ) &amp;&amp; ( email === undefined || email === null || !email.length ))
     return Q(_koc.prepareResponse({
       success: false,
       error: "Please enter a username or email"
     }));
-  if (email.length && !helpers.validateEmail(email))
+  if (email.length &amp;&amp; !helpers.validateEmail(email))
     return Q(_koc.prepareResponse({
       success: false,
       error: "Invalid EMail"
@@ -744,7 +771,7 @@ koc.prototype.logout = function () {
   return _koc.requestPage(false, "GET", "logout.php", null,
     function (response, body) {
       // Check the error msg, if any
-      if (body.indexOf('<input class="login_input" type="submit" value="Login"') >= 0)
+      if (body.indexOf('&lt;input class="login_input" type="submit" value="Login"') >= 0)
         return _koc.prepareResponse({
           success: true,
           message: "Logged out successfully"
@@ -835,7 +862,7 @@ koc.prototype.hireMercenaries = function (turing, inputNameValue) {
 var handleRecruit = function (koc, html) {
   var parsedResponse = koc.parser.parseRecruit(html);
   var p;
-  if (!parsedResponse.success && parsedResponse.error == "Invalid Selection") {
+  if (!parsedResponse.success &amp;&amp; parsedResponse.error == "Invalid Selection") {
     // we need to get the captcha
     koc.setKoCReCaptchaUrl(parsedResponse.challenge_url);
     p = koc.getReCaptchaChallenge()
@@ -853,7 +880,7 @@ var handleRecruit = function (koc, html) {
         return parsedResponse;
       });
   }
-  else if (parsedResponse.success === true && parsedResponse.image !== undefined && parsedResponse.image !== null && parsedResponse.image.length) {
+  else if (parsedResponse.success === true &amp;&amp; parsedResponse.image !== undefined &amp;&amp; parsedResponse.image !== null &amp;&amp; parsedResponse.image.length) {
     // add koc host and load it with correct session
     parsedResponse.image = koc.getKoCHost() + parsedResponse.image;
     p = koc.requestPage(true, "GET", parsedResponse.image, {}, function (response, img) {
@@ -935,7 +962,7 @@ koc.prototype.battlefield = function (page) {
   if (page === undefined || !isFinite(Number(page)))
     page = 1;
   var start = (Number(page) - 1) * 20;
-  if (start < 0)
+  if (start &lt; 0)
     start = 0;
   return _koc.requestPage(true, "GET", "battlefield.php", {
     start: start,
@@ -984,4 +1011,26 @@ koc.prototype.intelDetail = function (report_id) {
 // TODO: Sab
 
 
-module.exports = koc;
+module.exports = koc;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Modules</h3><ul><li><a href="module-helpers.html">helpers</a></li><li><a href="module-koc.html">koc</a></li><li><a href="module-parser.html">parser</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Sat Dec 06 2014 23:44:09 GMT+0900 (Tokyo Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,10 +1,13 @@
 var gulp   = require('gulp'),
     mocha  = require('gulp-mocha'),
     argv   = require('yargs').argv,
-    jshint = require('gulp-jshint');
+    del    = require('del'),
+    open   = require("gulp-open"),
+    jshint = require('gulp-jshint'),
+    jsdoc  = require("gulp-jsdoc");
 
 gulp.task('test', function() {
-    return gulp
+    gulp
         .src('test/*.js', {
             read: false,
         })
@@ -14,7 +17,7 @@ gulp.task('test', function() {
         }));
 });
 
-gulp.task('jshint', function () {
+gulp.task('jshint', function() {
     gulp.src('*.js')
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
@@ -26,4 +29,18 @@ gulp.task('jshint', function () {
         .pipe(jshint.reporter('default'));
 });
 
-gulp.task('default', [ 'jshint', 'test' ]);
+gulp.task('jsdoc:clean', function() {
+    return del('./doc/**');
+});
+
+gulp.task('jsdoc:generate', [ 'jsdoc:clean' ], function() {
+    return gulp.src( [ "*.js", "lib/*.js", "test/*.js", "README.md" ] )
+      .pipe(jsdoc('./doc'));
+});
+
+gulp.task('jsdoc', [ 'jsdoc:clean', 'jsdoc:generate' ], function() {
+    return gulp.src("./doc/index.html")
+      .pipe(open());
+} );
+
+gulp.task('default', [ 'jshint', 'jsdoc', 'test' ]); // ! Async !
