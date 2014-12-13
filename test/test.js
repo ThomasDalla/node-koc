@@ -11,15 +11,16 @@ chai.should();
 
 describe('Parse Battlefield', function () {
   var htmlPaths = [
-    // htmlPath                                    , loggedIn, # , total, current, max
-    ['test/html/battlefield_full_logged-out.html', false, 20, 2110, 1, 106],
-    ['test/html/battlefield_xhr_logged-out.html', false, 20, 2108, 2, 106],
-    ['test/html/battlefield_xhr_logged-in.html', true, 20, 2088, 103, 105],
-    ['test/html/battlefield_full_first-login.html', true, 20, 2093, 100, 105],
-    ['test/html/battlefield_xhr_02.html', true, 20, 1877, 83, 94],
-    ['test/html/battlefield_xhr_03.html', true, 20, 1877, 84, 94],
-    ['test/html/battlefield_xhr_04.html', true, 20, 1881, 84, 95],
-    ['test/html/battlefield_xhr_05.html', true, 20, 1882, 76, 95],
+    // htmlPath                                   , loggedIn, # , total, current, max
+    ['test/html/battlefield_full_logged-out.html' , false, 20, 2110,   1, 106],
+    ['test/html/battlefield_xhr_logged-out.html'  , false, 20, 2108,   2, 106],
+    ['test/html/battlefield_xhr_logged-in.html'   , true,  20, 2088, 103, 105],
+    ['test/html/battlefield_full_first-login.html', true,  20, 2093, 100, 105],
+    ['test/html/battlefield_xhr_02.html'          , true,  20, 1877,  83,  94],
+    ['test/html/battlefield_xhr_03.html'          , true,  20, 1877,  84,  94],
+    ['test/html/battlefield_xhr_04.html'          , true,  20, 1881,  84,  95],
+    ['test/html/battlefield_xhr_05.html'          , true,  20, 1882,  76,  95],
+    ['test/html/attack.html'                      , true,  20, 1406,  68,  71],
   ];
   htmlPaths.forEach(function (currentCase) {
     var htmlPath = currentCase[0];
