@@ -1330,6 +1330,12 @@ describe('Parse Attack Log', function () {
       it('should be an object', function () {
         return result.should.be.an('object');
       });
+      it('attacksOnYou should have correct keys', function () {
+        return result.should.be.an('object').that.has.property('attacksOnYou').that.has.keys('attacks','total','currentPage','maxPage','backPage','nextPage');
+      });
+      it('attacksByYou should have correct keys', function () {
+        return result.should.be.an('object').that.has.property('attacksOnYou').that.has.keys('attacks','total','currentPage','maxPage','backPage','nextPage');
+      });
       it('should have success==true', function () {
         return result.should.have.property('success').that.is.true;
       });
@@ -1383,6 +1389,12 @@ describe('Parse Intelligence', function () {
       });
       it('should have success==true', function () {
         return result.should.have.property('success').that.is.true;
+      });
+      it('intercepted should have correct keys', function () {
+        return result.should.be.an('object').that.has.property('intercepted').that.has.keys('operations','total','currentPage','maxPage','backPage','nextPage');
+      });
+      it('files should have correct keys', function () {
+        return result.should.be.an('object').that.has.property('files').that.has.keys('reports','total','currentPage','maxPage','backPage','nextPage');
       });
       it('should have intercepted ' + intercepted + ' operations', function () {
         return result.should.have.property('intercepted').that.has.property('operations').that.has.length(intercepted);
