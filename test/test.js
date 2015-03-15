@@ -87,10 +87,10 @@ describe('ReCaptcha Image', function () {
       return imagePromise.should.eventually.have.property("success").that.is.true;
     });
     it('should have image field', function () {
-      return imagePromise.should.eventually.have.property("image").that.is.not.empty;
+      return imagePromise.should.eventually.have.property("result").that.has.property("image").that.is.not.empty;
     });
     it('should have challenge field', function () {
-      return imagePromise.should.eventually.have.property("challenge").that.is.not.empty;
+      return imagePromise.should.eventually.have.property("result").that.has.property("challenge").that.is.not.empty;
     });
   });
 });
@@ -105,10 +105,10 @@ describe('Signup', function () {
       return verifyPromise.should.eventually.have.property("success").that.is.true;
     });
     it('should have username field', function () {
-      return verifyPromise.should.eventually.have.property("username").that.is.not.empty;
+      return verifyPromise.should.eventually.have.property("result").that.has.property("username").that.is.not.empty;
     });
     it('should have password field', function () {
-      return verifyPromise.should.eventually.have.property("password").that.is.not.empty;
+      return verifyPromise.should.eventually.have.property("result").that.has.property("password").that.is.not.empty;
     });
   });
   describe('#verification wrong username correct pass', function () {
@@ -120,10 +120,10 @@ describe('Signup', function () {
       return verifyPromise.should.eventually.have.property("success").that.is.true;
     });
     it('should have username field', function () {
-      return verifyPromise.should.eventually.have.property("username").that.is.not.empty;
+      return verifyPromise.should.eventually.have.property("result").that.has.property("username").that.is.not.empty;
     });
     it('should have password field', function () {
-      return verifyPromise.should.eventually.have.property("password").that.is.empty;
+      return verifyPromise.should.eventually.have.property("result").that.has.property("password").that.is.empty;
     });
   });
 });
@@ -221,7 +221,7 @@ describe('Parse Base', function () {
       return basePromise.should.eventually.have.property("error").that.is.not.empty;
     });
     it('should have a user field', function () {
-      return basePromise.should.eventually.have.property("user").that.is.empty;
+      return basePromise.should.eventually.have.property("result").that.has.property("user").that.is.empty;
     });
   });
   describe("#remote failing because not logged in", function () {
@@ -304,7 +304,7 @@ describe('Parse Races Information', function () {
       return basePromise.should.eventually.have.property("kocHost").that.is.a('string').that.has.length.above(4);
     });
     it('should have races field that is an array of 5 items and features should be an array', function () {
-      return basePromise.should.eventually.have.property("races")
+      return basePromise.should.eventually.have.property("result").that.has.property("races")
         .that.is.an('array')
         .that.has.length(5)
         .that.has.deep.property('[0]')
@@ -312,7 +312,7 @@ describe('Parse Races Information', function () {
         .that.has.property('features').that.is.an('array');
     });
     it('should have races field that is an array of 5 items and colours should be an object', function () {
-      return basePromise.should.eventually.have.property("races")
+      return basePromise.should.eventually.have.property("result").that.has.property("races")
         .that.is.an('array')
         .that.has.length(5)
         .that.has.deep.property('[0]')
