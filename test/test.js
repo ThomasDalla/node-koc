@@ -635,19 +635,22 @@ describe('Logout', function () {
 
 describe('Parse Full User Stats', function () {
   var htmlPaths = [
-    // page                                         , commander, nb officers, total nb officers, number of alliances, primary alliance
-    ['test/html/stats_NoOfficer_Alliance.html', "P0lytech", 0, 0, 1, 'Forces of Darkness'],
-    ['test/html/stats_NoOfficer_NoAlliance.html', "chosen", 0, 0, 0, null],
-    ['test/html/stats_Officers_Alliance.html', "TheGodFather_LaCN", 10, 25, 1, "La Cosa Nostra"],
-    ['test/html/stats_Officers_NoMainAlliance.html', 'None', 7, 7, 1, null],
+    // page                                        , commander, nb officers, total nb officers, number of alliances, primary alliance
+    ['test/html/stats_NoOfficer_Alliance.html'     , "P0lytech"         ,  0,  0, 1, 'Forces of Darkness'  , "None", "" ],
+    ['test/html/stats_NoOfficer_NoAlliance.html'   , "chosen"           ,  0,  0, 0, null                  , "None", "" ],
+    ['test/html/stats_Officers_Alliance.html'      , "TheGodFather_LaCN", 10, 25, 1, "La Cosa Nostra"      , "None", "" ],
+    ['test/html/stats_Officers_NoMainAlliance.html', 'None'             ,  7,  7, 1, null                  , "None", "" ],
+    ['test/html/stats_SupremeCommander.html'       , "chosen"           , 10, 12, 2, "La Cosa Nostra"      , "Merchantofdeath_LaCN", "LaCN" ],
   ];
   htmlPaths.forEach(function (page) {
-    var htmlPath = page[0];
-    var commander = page[1];
-    var officersNb = page[2];
-    var totalOfficersNb = page[3];
-    var alliancesNb = page[4];
-    var primaryAlliance = page[5];
+    var htmlPath         = page[0];
+    var commander        = page[1];
+    var officersNb       = page[2];
+    var totalOfficersNb  = page[3];
+    var alliancesNb      = page[4];
+    var primaryAlliance  = page[5];
+    var supremeCommander = page[6];
+    var chainName        = page[7];
     describe('#local ' + htmlPath, function () {
       var html = fs.readFileSync(htmlPath, 'utf8');
       var result = koc.parser.parseFullStats(html);
@@ -669,11 +672,19 @@ describe('Parse Full User Stats', function () {
           'fortification',
           'buddyStatus',
           'alliances',
-          'officers'
+          'officers',
+          'supremeCommander',
+          'chainName'
         );
       });
       it('should have commander ' + commander, function () {
         return result.should.have.property('user').that.has.property('commander').that.has.property('username').that.eql(commander);
+      });
+      it('should have supreme commander ' + supremeCommander, function () {
+        return result.should.have.property('user').that.has.property('supremeCommander').that.has.property('username').that.eql(supremeCommander);
+      });
+      it('should have chain name ' + chainName, function () {
+        return result.should.have.property('user').that.has.property('chainName').that.eql(chainName);
       });
       it('should have ' + officersNb + ' officers', function () {
         return result.should.have.property('user').that.has.property('officers').that.is.an('array').that.has.length(officersNb);
