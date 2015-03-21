@@ -1236,6 +1236,7 @@ describe('Parse Recruit', function () {
           iuniqid: '1f8097b1f1a2c611c13ea7c54df5a8d1',
           uniqid: 'vqr4na2u',
         },
+        "recruitPreference": "Anyone",
         "recruitPreferences": [
           {
             "checked": false,
@@ -1255,6 +1256,10 @@ describe('Parse Recruit', function () {
         ],
         "recruitPreferencesInputName": "clickPref",
         "fieldName": "image_click_value",
+        user: {
+          username: "Test Account",
+          userid: 4502442,
+        },
       }
     ],
     ['test/html/recruit_01.html',
@@ -1266,6 +1271,7 @@ describe('Parse Recruit', function () {
           iuniqid: 'e1ee70ae2b1f5d644d175a5fdf889632',
           uniqid: '4p1tq6gt',
         },
+        "recruitPreference": "Anyone",
         "recruitPreferences": [
           {
             "checked": false,
@@ -1285,6 +1291,10 @@ describe('Parse Recruit', function () {
         ],
         "recruitPreferencesInputName": "clickPref",
         "fieldName": "image_click_value",
+        user: {
+          username: "Test Account",
+          userid: 4502444,
+        },
       }
     ],
     ["test/html/recruit_invalid_01.html",
@@ -1292,6 +1302,7 @@ describe('Parse Recruit', function () {
         success: false,
         error: 'Invalid Selection',
         challenge_url: 'http://api.recaptcha.net/challenge?k=6LcvaQQAAAAAACnjh5psIedbdyYzGDb0COW82ruo',
+        recruitPreference: "Anyone",
         recruitPreferences: [{name: 'Only Me', value: '1', checked: false},
           {name: 'Anyone', value: '4', checked: true}],
         recruitPreferencesInputName: 'clickPref',
@@ -1301,6 +1312,31 @@ describe('Parse Recruit', function () {
           recaptcha_response_field: "manual_challenge",
           uniqid: "ab1cd2ef",
         },
+      }
+    ],
+    ['test/html/recruit_NoOneLeft.html',
+      {
+        success: false,
+        error: 'There is no one left to click.',
+        "recruitPreference": "Only Me",
+        "recruitPreferences": [
+          {
+            "checked": true,
+            "name": "Only Me",
+            "value": "1",
+          },
+          {
+            "checked": false,
+            "name": "Friends",
+            "value": "2",
+          },
+          {
+            "checked": false,
+            "name": "Anyone",
+            "value": "4",
+          }
+        ],
+        "recruitPreferencesInputName": "clickPref",
       }
     ],
   ];
