@@ -1574,7 +1574,7 @@ describe('Parse Intel Detail', function () {
     // page                       success, total soldiers,      SA,    gold, # of weapons, story
     ['test/html/inteldetail_01.html', true, 2660, 139142, 4590655, 12, ['sneaks into AusGamer\'s camp', 'provides you with the information gathered']],
     ['test/html/inteldetail_02.html', true, 1510, 6629289, 7446987, 4, ['sneaks into VANISH\'s camp', 'provides you with the information gathered']],
-    ['test/html/inteldetail_03_aborted.html', false, null, null, null, null, ['sneaks into tomptanker\'s camp', 'you will need a more powerful force']],
+    ['test/html/inteldetail_03_aborted.html', true, null, null, null, null, ['sneaks into tomptanker\'s camp', 'you will need a more powerful force']],
   ];
   htmlPaths.forEach(function (page) {
     var htmlPath = page[0];
