@@ -1489,8 +1489,8 @@ describe('Parse Battle Report', function () {
 // Intel File tests
 describe('Parse Intel File', function () {
   var htmlPaths = [
-    // page                                 error?  currentPage maxPage total reports
-    ['test/html/intelfile_01.html', "", 1, 1, 2, [{
+    // page                         error? currentPage maxPage total username  reports
+    ['test/html/intelfile_01.html',    "",          1,       1,   2, 'VANISH', [{
       missionType: "Recon",
       numberOfSpies: 0,
       reportId: "28708478",
@@ -1503,33 +1503,34 @@ describe('Parse Intel File', function () {
       "result": "Success",
       "time": "2 weeks ago",
     }]],
-    // page                                 error?  currentPage maxPage total reports
-    ['test/html/intelfile_02.html', "", 1, 1, 1, [{
+    // page                         error? currentPage maxPage total username      reports
+    ['test/html/intelfile_02.html',    "",          1,       1,   1, 'Lord_Gubbo', [{
       "missionType": "Recon",
       "numberOfSpies": 0,
       "reportId": "28708460",
       "result": "Success",
       "time": "2 weeks ago",
     }]],
-    // page                                 error?  currentPage maxPage total reports
-    ['test/html/intelfile_03_aborted.html', "", 1, 1, 1, [{
+    // page                                 error?  currentPage maxPage total  username     reports
+    ['test/html/intelfile_03_aborted.html',     "",           1,     1,    1, 'tomptanker', [{
       "missionType": "Recon",
       "numberOfSpies": 0,
       "reportId": "29037739",
       "result": "Aborted",
       "time": "13 seconds ago",
     }]],
-    ['test/html/intelfile_04_invalid.html', "Invalid intelligence file"],
+    ['test/html/intelfile_04_invalid.html', "Invalid intelligence file" ],
   ];
   htmlPaths.forEach(function (page) {
     var htmlPath = page[0];
     var expectedError = page[1];
-    var expectedCurrentPage, expectedMaxPage, expectedTotal, expectedReports;
+    var expectedCurrentPage, expectedMaxPage, expectedTotal, expectedReports, expectedUsername;
     if (!expectedError.length) {
       expectedCurrentPage = page[2];
-      expectedMaxPage = page[3];
-      expectedTotal = page[4];
-      expectedReports = page[5];
+      expectedMaxPage     = page[3];
+      expectedTotal       = page[4];
+      expectedUsername    = page[5];
+      expectedReports     = page[6];
     }
     describe('#local ' + htmlPath, function () {
       var html = fs.readFileSync(htmlPath, 'utf8');
@@ -1556,6 +1557,9 @@ describe('Parse Intel File', function () {
         it('Should have ' + expectedReports.length + " report(s) on this page", function () {
           result.should.have.property("reports").that.is.an("array").that.has.length(expectedReports.length);
         });
+        it('should be a report for user ' + expectedUsername, function () {
+          result.should.have.property("username").that.eql(expectedUsername);
+        });
         var reportsCopy = result.reports.slice(0);
         expectedReports.forEach(function (expectedReport) {
           var actualReport = reportsCopy.shift();
@@ -1571,19 +1575,21 @@ describe('Parse Intel File', function () {
 // Test Intel Detail
 describe('Parse Intel Detail', function () {
   var htmlPaths = [
-    // page                       success, total soldiers,      SA,    gold, # of weapons, story
-    ['test/html/inteldetail_01.html', true, 2660, 139142, 4590655, 12, ['sneaks into AusGamer\'s camp', 'provides you with the information gathered']],
-    ['test/html/inteldetail_02.html', true, 1510, 6629289, 7446987, 4, ['sneaks into VANISH\'s camp', 'provides you with the information gathered']],
-    ['test/html/inteldetail_03_aborted.html', true, null, null, null, null, ['sneaks into tomptanker\'s camp', 'you will need a more powerful force']],
+    // page                      success, total soldiers,      SA,    gold, # of weapons, story                                                                 , username
+    ['test/html/inteldetail_01.html'        , true, 2660,  139142, 4590655,   12, ['sneaks into AusGamer\'s camp', 'provides you with the information gathered'], 'AusGamer'  , true  ],
+    ['test/html/inteldetail_02.html'        , true, 1510, 6629289, 7446987,    4, ['sneaks into VANISH\'s camp', 'provides you with the information gathered'  ], 'VANISH'    , true  ],
+    ['test/html/inteldetail_03_aborted.html', true, null,    null,    null,    0, ['sneaks into tomptanker\'s camp', 'you will need a more powerful force'     ], 'tomptanker', false ],
   ];
   htmlPaths.forEach(function (page) {
-    var htmlPath = page[0];
-    var expectedSuccess = page[1];
-    var expectedTotalSoldiers = page[2];
-    var expectedStrikeAction = page[3];
-    var expectedGold = page[4];
+    var htmlPath                = page[0];
+    var expectedSuccess         = page[1];
+    var expectedTotalSoldiers   = page[2];
+    var expectedStrikeAction    = page[3];
+    var expectedGold            = page[4];
     var expectedNumberOfWeapons = page[5];
-    var expectedStories = page[6];
+    var expectedStories         = page[6];
+    var expectedUsername        = page[7];
+    var expectedSpySuccess      = page[8];
     describe('#local ' + htmlPath, function () {
       var html = fs.readFileSync(htmlPath, 'utf8');
       var result = koc.parser.parseIntelDetail(html);
@@ -1594,7 +1600,7 @@ describe('Parse Intel Detail', function () {
       it('should have success==' + expectedSuccess, function () {
         return result.should.have.property('success').that.eql(expectedSuccess);
       });
-      if (expectedSuccess && result.success === true) {
+      if (expectedSpySuccess && result.success === true) {
         it('should have ' + expectedTotalSoldiers + " total soldiers", function () {
           if (result.should.have.property('army')
               .that.is.an('object')
@@ -1620,6 +1626,9 @@ describe('Parse Intel Detail', function () {
           result.should.have.property('weapons').that.is.an('array').of.length(expectedNumberOfWeapons);
         });
       }
+      it('should have username==' + expectedUsername, function () {
+        result.should.have.property('username').that.eql(expectedUsername);
+      });
       expectedStories.forEach(function (expectedStory) {
         it('Story should contain "' + expectedStory + '"', function () {
           result.should.have.property('story').that.contain(expectedStory);
