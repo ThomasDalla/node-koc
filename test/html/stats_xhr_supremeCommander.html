@@ -1,0 +1,112 @@
+<table width="100%" border="0" cellspacing="7" cellpadding="0">
+    <tr>
+        <td width="50%" valign="top">
+            <table width="100%" class="table_lines" cellspacing="0" cellpadding="3" border="0">
+                <tr>
+                    <th colspan="2">User Stats</th>
+                </tr>
+                <tr>
+                    <td><b>Full Profile:</b></td>
+                    <td><a href="stats.php?id=4508382">Exalion</a></td>
+                </tr>
+                <tr>
+                    <td><b>Commander:</b></td>
+                    <td><a href="stats.php?id=4462338">Boena</a></td>
+                </tr>
+                <tr>
+                    <td style="border-bottom: 0;"><b>Supreme Commander</b></td>
+                    <td><a href="stats.php?id=4366140">funnybone-sr</a></td>
+                </tr>
+                <tr>
+                    <td><b>Highest Rank</b></td>
+                    <td>1,486 / 7 hours ago</td>
+                </tr>
+                <tr>
+                    <td><b>Treasury:</b></td>
+                    <td>10,006,720</td>
+                </tr>
+                <tr>
+                    <td><b>Fortifications:</b></td>
+                    <td>Drawbridge</td>
+                </tr>
+                <tr>
+                    <td><b>Buddy List Status:</b></td>
+                    <td>
+                        <form action="addbuddy.php" method="post">
+                            <input type="hidden" name="user_id" value="4508382">
+                            <img style="padding-right: 5px; display: none" alt="" src="/images//buddy_icons/small_icon_.gif">
+                            <select name="buddy_type"><option label="none" value="none">none</option>
+                                <option label="neutral" value="neutral">neutral</option>
+                                <option label="friend" value="friend">friend</option>
+                                <option label="enemy" value="enemy">enemy</option>
+                                <option label="ignored" value="ignored">ignored</option>
+                            </select>
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Last 24 Hours:</b>
+                    </td>
+                    <td>
+                        No battles reported.
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>Alliances (1):</b></td>
+                    <td>
+                        <span class="alliance"><a href="alliances.php?id=5806">Sweet Revenge</a></span>
+                    </td>
+                <tr>
+            </table>
+        </td>
+        <td valign="top">
+            <table width="100%" cellspacing="7">
+                <tr>
+                    <td colspan="4" align="center">
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" align="center">
+                        <form action="attack.php" method="post" name="attack">
+                            <input type="hidden" name="defender_id" value="4508382">
+                            <input type="hidden" name="attack_type" value="attack">
+                            <input style="width: 100%" name="attackbut" onClick="document.attack.attackbut.value='Attacking..'; document.attack.attackbut.disabled=true; document.attack.submit();" type="submit" value="Attack Now!">
+                            <input type="hidden" name="turing" value="cxkpn">
+                        </form>
+                    </td>
+                    <td width="25%" align="center">
+                        <form action="attack.php" method="post" name="attack">
+                            <input type="hidden" name="defender_id" value="4508382">
+                            <input type="hidden" name="attack_type" value="raid">
+                            <input style="width: 100%" name="attackbut" onClick="document.attack.attackbut.value='Raiding..'; document.attack.attackbut.disabled=true; document.attack.submit();" type="submit" value="Raid Now!">
+                            <input type="hidden" name="turing" value="cxkpn">
+                        </form>
+                    </td>
+                    <td width="25%" align="center">
+                        <form action="attack.php#sab" method="get">
+                            <input type="hidden" name="id" value="4508382">
+                            <input style="width: 100%" type="submit" value="Sab Now!">
+                        </form>
+                    </td>
+                    <td width="25%" align="center">
+                        <form action="attack.php" method="post" name="spyr">
+                            <input type="hidden" name="mission_type" value="recon">
+                            <input type="hidden" name="defender_id" value="4508382">
+                            <input style="width: 100%" type="submit" name="spyrbut" onclick="document.spyr.spyrbut.value='Spying..'; document.spyr.spyrbut.disabled=true; document.spyr.submit();" value="Recon Now!">
+                            <input type="hidden" name="turing" value="cxkpn">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" align="center">
+                        <form action="writemail.php" method="get">
+                            <input type="hidden" name="to" value="4508382">
+                            <input style="width: 100%" type="submit" value="Send Message">
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>

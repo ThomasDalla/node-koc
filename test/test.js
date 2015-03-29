@@ -1637,3 +1637,66 @@ describe('Parse Intel Detail', function () {
     });
   });
 });
+
+// Test XHR Stats (Quick Stats from battlefield)
+describe('Parse Quick Stats', function () {
+  var htmlPaths = [
+    // page                      expected
+    [ 'test/html/stats_xhr.html',
+      {
+        success: true,
+        userid: 4491574,
+        username: 'Rook',
+        commander: { username: 'None' },
+        supremeCommander: { username: 'None' },
+        highestRank: '695 / 4 months ago',
+        treasury: 5234238,
+        treasuryAsText: '5,234,238',
+        fortification: 'Trenches',
+        buddyStatus: 'none',
+        turing: 'scfnv',
+      },
+    ],
+    [ 'test/html/stats_xhr_supremeCommander.html',
+      {
+        success: true,
+        userid: 4508382,
+        username: 'Exalion',
+        commander: { username: 'Boena', userid: 4462338 },
+        supremeCommander: { username: 'funnybone-sr', userid: 4366140 },
+        highestRank: '1,486 / 7 hours ago',
+        treasury: 10006720,
+        treasuryAsText: '10,006,720',
+        fortification: 'Drawbridge',
+        buddyStatus: 'none',
+        turing: 'cxkpn',
+      },
+    ],
+    [ 'test/html/stats_xhr_supremeCommander_buddyStatusEnemy.html',
+      {
+        success: true,
+        userid: 4508714,
+        username: 'Pellucidity',
+        commander: { username: 'thebaldchinian-SR', userid: 4497483 },
+        supremeCommander: { username: 'funnybone-sr', userid: 4366140 },
+        highestRank: '???',
+        treasury: -1,
+        treasuryAsText: '???',
+        fortification: '???',
+        buddyStatus: 'enemy',
+        turing: 'vxwjk'
+      },
+    ],
+  ];
+  htmlPaths.forEach(function (page) {
+    var htmlPath = page[0];
+    var expected = page[1];
+    describe('#local ' + htmlPath, function () {
+      var html = fs.readFileSync(htmlPath, 'utf8');
+      var result = koc.parser.parseQuickStats(html);
+      it('should be as expected', function () {
+        result.should.eql(expected);
+      });
+    });
+  });
+});
