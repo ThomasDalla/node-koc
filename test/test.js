@@ -635,12 +635,12 @@ describe('Logout', function () {
 
 describe('Parse Full User Stats', function () {
   var htmlPaths = [
-    // page                                        , commander, nb officers, total nb officers, number of alliances, primary alliance
-    ['test/html/stats_NoOfficer_Alliance.html'     , "P0lytech"         ,  0,  0, 1, 'Forces of Darkness'  , "None", "" ],
-    ['test/html/stats_NoOfficer_NoAlliance.html'   , "chosen"           ,  0,  0, 0, null                  , "None", "" ],
-    ['test/html/stats_Officers_Alliance.html'      , "TheGodFather_LaCN", 10, 25, 1, "La Cosa Nostra"      , "None", "" ],
-    ['test/html/stats_Officers_NoMainAlliance.html', 'None'             ,  7,  7, 1, null                  , "None", "" ],
-    ['test/html/stats_SupremeCommander.html'       , "chosen"           , 10, 12, 2, "La Cosa Nostra"      , "Merchantofdeath_LaCN", "LaCN" ],
+    // page                                        , commander, nb officers, total nb officers, number of alliances, primary alliance turing
+    ['test/html/stats_NoOfficer_Alliance.html'     , "P0lytech"         ,  0,  0, 1, 'Forces of Darkness'  , "None", "", "vckfb" ],
+    ['test/html/stats_NoOfficer_NoAlliance.html'   , "chosen"           ,  0,  0, 0, null                  , "None", "", "vckfb" ],
+    ['test/html/stats_Officers_Alliance.html'      , "TheGodFather_LaCN", 10, 25, 1, "La Cosa Nostra"      , "None", "", "vckfb" ],
+    ['test/html/stats_Officers_NoMainAlliance.html', 'None'             ,  7,  7, 1, null                  , "None", "", "vckfb" ],
+    ['test/html/stats_SupremeCommander.html'       , "chosen"           , 10, 12, 2, "La Cosa Nostra"      , "Merchantofdeath_LaCN", "LaCN", "xpn" ],
   ];
   htmlPaths.forEach(function (page) {
     var htmlPath         = page[0];
@@ -651,6 +651,7 @@ describe('Parse Full User Stats', function () {
     var primaryAlliance  = page[5];
     var supremeCommander = page[6];
     var chainName        = page[7];
+    var turing           = page[8];
     describe('#local ' + htmlPath, function () {
       var html = fs.readFileSync(htmlPath, 'utf8');
       var result = koc.parser.parseFullStats(html);
@@ -694,6 +695,9 @@ describe('Parse Full User Stats', function () {
       });
       it('should have ' + alliancesNb + ' alliances', function () {
         return result.should.have.property('user').that.has.property('alliances').that.is.an('array').that.has.length(alliancesNb);
+      });
+      it('should have turing ' + turing, function () {
+        return result.should.have.property('turing').that.eql(turing);
       });
       if (primaryAlliance !== null) {
         it('should have primary alliance ' + primaryAlliance, function () {
