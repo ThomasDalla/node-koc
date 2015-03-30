@@ -245,20 +245,21 @@ describe('Parse Base', function () {
 
 describe('Parse Left-Side Box', function () {
   var htmlPaths = [
-    // page                                        , has the box
-    ['test/html/base_first-login.html', true],
-    ['test/html/base_01.html', true],
-    ['test/html/base_mails_read.html', true],
-    ['test/html/battlefield_full_logged-out.html', false],
-    ['test/html/battlefield_xhr_logged-out.html', false],
-    ['test/html/battlefield_xhr_logged-in.html', false],
-    ['test/html/battlefield_full_first-login.html', true],
-    ['test/html/home.html', false],
-    ['test/html/verify.html', true]
+    // page                                        , has the box, has username/fortification in the title
+    ['test/html/base_first-login.html', true, true],
+    ['test/html/base_01.html', true, true],
+    ['test/html/base_mails_read.html', true, true],
+    ['test/html/battlefield_full_logged-out.html', false, false],
+    ['test/html/battlefield_xhr_logged-out.html', false, false],
+    ['test/html/battlefield_xhr_logged-in.html', false, false],
+    ['test/html/battlefield_full_first-login.html', true, false],
+    ['test/html/home.html', false, false],
+    ['test/html/verify.html', true, false]
   ];
   htmlPaths.forEach(function (page) {
     var htmlPath = page[0];
     var hasBox = page[1];
+    var hasUsernameFortification = page[2];
     describe('#local ' + htmlPath, function () {
       var html = fs.readFileSync(htmlPath, 'utf8');
       var result = koc.parser.parseLeftSideBox(html);
@@ -266,8 +267,12 @@ describe('Parse Left-Side Box', function () {
       it('should be an object', function () {
         return result.should.be.an('object');
       });
-      ['username', 'fortification', 'goldText', 'experienceText', 'turns', 'rank',
-        'lastAttacked', 'mails'].forEach(function (field) {
+      var fields = ['goldText', 'experienceText', 'turns', 'rank',
+        'lastAttacked', 'mails'];
+      if (hasUsernameFortification===true){
+        fields.push('username', 'fortification');
+      }
+      fields.forEach(function (field) {
           it("should have property '" + field + "'", function () {
             return result.should.have.property(field).that.is.not.empty;
           });
