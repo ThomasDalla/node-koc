@@ -760,6 +760,205 @@ describe('Parse Armory', function () {
       turing: "udnvm",
       error: "Not enough money for those items.",
     }],
+    ['test/html/armory_01.html', {
+      nbAttackWeapons: 3,
+      nbDefenseWeapons: 3,
+      nbSpyTools: 5,
+      nbSentryTools: 2,
+      fortification: "Trenches (x 5.96)",
+      siegeTechnology: "Sappers (x 17.92)",
+      turing: "kvm",
+      error: "",
+      currentWeapons: {
+        "Attack Weapons": [
+          {
+            "name": "Blackpowder Missile",
+            "quantity": 415,
+            "sell": {
+              "inputName": "scrapsell[70]",
+              "price": 700000,
+              "priceText": "700,000 Gold"
+            },
+            "strengthText": "1,000 / 1,000",
+            strengthCurrent: 1000,
+            strengthMax: 1000,
+            "weaponId": 70
+          },
+          {
+            "name": "Chariot",
+            "quantity": 2,
+            "repair": {
+              "defaultValue": 0.67,
+              "inputName": "repair[72]",
+              "pricePerPoint": 570
+            },
+            "sell": {
+              "inputName": "scrapsell[72]",
+              "price": 314649,
+              "priceText": "314,649 Gold"
+            },
+            "strengthText": "599.33 / 600",
+            strengthCurrent: 599.33,
+            strengthMax: 600,
+            "weaponId": 72
+          },
+          {
+            "name": "Excalibur",
+            "quantity": 1,
+            "repair": {
+              "defaultValue": 0.21,
+              "inputName": "repair[27]",
+              "pricePerPoint": 297
+            },
+            "sell": {
+              "inputName": "scrapsell[27]",
+              "price": 139886,
+              "priceText": "139,886 Gold"
+            },
+            "strengthText": "255.79 / 256",
+            strengthCurrent: 255.79,
+            strengthMax: 256,
+            "weaponId": 27
+          }
+        ],
+        "Defense Weapons": [
+          {
+            "name": "Invisibility Shield",
+            "quantity": 126,
+            "sell": {
+              "inputName": "scrapsell[71]",
+              "price": 700000,
+              "priceText": "700,000 Gold"
+            },
+            "strengthText": "1,000 / 1,000",
+            strengthCurrent: 1000,
+            strengthMax: 1000,
+            "weaponId": 71
+          },
+          {
+            "name": "Mithril",
+            "quantity": 1,
+            "sell": {
+              "inputName": "scrapsell[46]",
+              "price": 35000,
+              "priceText": "35,000 Gold"
+            },
+            "strengthText": "64 / 64",
+            strengthCurrent: 64,
+            strengthMax: 64,
+            "weaponId": 46
+          },
+          {
+            "name": "Shield",
+            "quantity": 15,
+            "sell": {
+              "inputName": "scrapsell[38]",
+              "price": 3500,
+              "priceText": "3,500 Gold"
+            },
+            "strengthText": "5 / 5",
+            strengthCurrent: 5,
+            strengthMax: 5,
+            "weaponId": 38
+          }
+        ],
+        "Sentry Tools": [
+          {
+            "name": "Lookout Tower",
+            "quantity": 225,
+            "sell": {
+              "inputName": "scrapsell[74]",
+              "price": 700000,
+              "priceText": "700,000 Gold"
+            },
+            "strengthText": "1,000",
+            strengthCurrent: 1000,
+            strengthMax: 1000,
+            "weaponId": 74
+          },
+          {
+            "name": "Guard Dog",
+            "quantity": 6,
+            "sell": {
+              "inputName": "scrapsell[68]",
+              "price": 175000,
+              "priceText": "175,000 Gold"
+            },
+            "strengthText": "250",
+            strengthCurrent: 250,
+            strengthMax: 250,
+            "weaponId": 68
+          }
+        ],
+        "Spy Tools": [
+          {
+            "name": "Nunchaku",
+            "quantity": 2193,
+            "sell": {
+              "inputName": "scrapsell[75]",
+              "price": 700000,
+              "priceText": "700,000 Gold"
+            },
+            "strengthText": "1,000",
+            strengthCurrent: 1000,
+            strengthMax: 1000,
+            "weaponId": 75
+          },
+          {
+            "name": "Skeleton Key",
+            "quantity": 2,
+            "sell": {
+              "inputName": "scrapsell[73]",
+              "price": 420000,
+              "priceText": "420,000 Gold"
+            },
+            "strengthText": "600",
+            strengthCurrent: 600,
+            strengthMax: 600,
+            "weaponId": 73
+          },
+          {
+            "name": "Grappling Hook",
+            "quantity": 1,
+            "sell": {
+              "inputName": "scrapsell[67]",
+              "price": 175000,
+              "priceText": "175,000 Gold"
+            },
+            "strengthText": "250",
+            strengthCurrent: 250,
+            strengthMax: 250,
+            "weaponId": 67
+          },
+          {
+            "name": "Cloak",
+            "quantity": 1,
+            "sell": {
+              "inputName": "scrapsell[65]",
+              "price": 98000,
+              "priceText": "98,000 Gold"
+            },
+            "strengthText": "140",
+            strengthCurrent: 140,
+            strengthMax: 140,
+            "weaponId": 65
+          },
+          {
+            "name": "Dirk",
+            "quantity": 1,
+            "sell": {
+              "inputName": "scrapsell[63]",
+              "price": 52500,
+              "priceText": "52,500 Gold"
+            },
+            "strengthText": "75",
+            strengthCurrent: 75,
+            strengthMax: 75,
+            "weaponId": 63
+          }
+        ]
+      },
+    }],
   ];
   htmlPaths.forEach(function (page) {
     var htmlPath = page[0];
@@ -776,6 +975,24 @@ describe('Parse Armory', function () {
       it('error should be: ' + expected.error, function () {
         return result.should.be.an('object').that.has.property('error').that.eql(expected.error);
       });
+      if(expected.currentWeapons!==undefined){
+        it('Current weapons should be as expected (Attack)', function () {
+          result.should.be.an('object').that.has.property('currentWeapons')
+            .that.has.property("Attack Weapons").that.eql(expected.currentWeapons['Attack Weapons']);
+        });
+        it('Current weapons should be as expected (Defense)', function () {
+          result.should.be.an('object').that.has.property('currentWeapons')
+            .that.has.property("Defense Weapons").that.eql(expected.currentWeapons['Defense Weapons']);
+        });
+        it('Current weapons should be as expected (Spy)', function () {
+          result.should.be.an('object').that.has.property('currentWeapons')
+            .that.has.property("Spy Tools").that.eql(expected.currentWeapons['Spy Tools']);
+        });
+        it('Current weapons should be as expected (Sentry)', function () {
+          result.should.be.an('object').that.has.property('currentWeapons')
+            .that.has.property("Sentry Tools").that.eql(expected.currentWeapons['Sentry Tools']);
+        });
+      }
       [{
         type: "Attack Weapons",
         nbWeapons: expected.nbAttackWeapons
@@ -1067,6 +1284,68 @@ describe('Parse Training', function () {
         }
       ]
     }],
+    ['test/html/train_01.html', {
+      message: "",
+      turing: "kvm",
+      totalFightingForce: 2289,
+      totalFightingForceText: "2,289",
+      trainingPrograms: 6,
+      personnel: {
+        "Army Morale": -100,
+        "Army Morale Text": "-100",
+        "Sentries": 645,
+        "Sentries Text": "645",
+        "Spies": 2433,
+        "Spies Text": "2,433",
+        "Total Fighting Force": 2289,
+        "Total Fighting Force Text": "2,289",
+        "Trained Attack Mercenaries": 435,
+        "Trained Attack Mercenaries Text": "435",
+        "Trained Attack Soldiers": 5,
+        "Trained Attack Soldiers Text": "5",
+        "Trained Defense Mercenaries": 5,
+        "Trained Defense Mercenaries Text": "5",
+        "Trained Defense Soldiers": 5,
+        "Trained Defense Soldiers Text": "5",
+        "Untrained Mercenaries": 166,
+        "Untrained Mercenaries Text": "166",
+        "Untrained Soldiers": 1673,
+        "Untrained Soldiers Text": "1,673",
+      },
+      upgrades: [
+        {
+          currentTitle: 'Current Covert Skill',
+          upgradeName: 'Upgrade',
+          currentLevel: 'Level 15',
+          cost: 'N/A',
+          inputName: 'upgrade_spy',
+        },
+        {
+          title: 'Increase Conscription',
+          currentTitle: 'Current Conscription Rate',
+          upgradeName: 'Upgrade to 1280 per day',
+          currentLevel: '640 soldiers per day',
+          cost: '32,755,309 Gold',
+          inputName: 'upgrade_prod',
+        },
+        {
+          title: 'Economic Development',
+          currentTitle: 'Current Economy',
+          upgradeName: 'Research Mining (1600 gold per turn)',
+          currentLevel: 'Fishing (600 gold per turn)',
+          cost: '2,400 Experience',
+          inputName: 'upgrade_economy',
+        },
+        {
+          title: 'Technological Development',
+          currentTitle: 'Current Technologies',
+          upgradeName: 'Research!',
+          currentLevel: 'Timekeeping  (x 2.79 strength)',
+          cost: '5,650 Experience',
+          inputName: 'upgrade_tech',
+        }
+      ]
+    }],
   ];
   htmlPaths.forEach(function (page) {
     var htmlPath = page[0];
@@ -1080,6 +1359,11 @@ describe('Parse Training', function () {
       it('turing should be: ' + expected.turing, function () {
         return result.should.be.an('object').that.has.property('turing').that.eql(expected.turing);
       });
+      if(expected.personnel!==undefined) {
+        it('personnel should be as expected', function () {
+          return result.should.be.an('object').that.has.property('personnel').that.eql(expected.personnel);
+        });
+      }
       it('message should be: \'' + expected.message + "'", function () {
         return result.should.be.an('object').that.has.property('message').that.eql(expected.message);
       });
