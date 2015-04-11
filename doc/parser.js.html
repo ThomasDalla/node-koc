@@ -88,8 +88,8 @@ parser.parseBannedMessage = function (html) {
  * @return {Object} an object with an array of the players information found on that page
  */
 parser.parseBattlefield = function (html) {
-  var reLoggedIn = /&lt;td align="center" valign="middle" style="padding: 0">\s*(.*)\s*(.*)\s*&lt;\/td>\s*&lt;td.*>&lt;a href="alliances\.php\?id=([^"]*)">[^&lt;]*&lt;\/a>&lt;\/td>\s*&lt;td>&lt;a class="player" href="\/stats\.php\?id=([0-9]+)"\s*>([^&lt;]+)&lt;\/a>&lt;\/td>[^>]*>([0-9,]+)&lt;\/td>[^>]*>\s*([A-Za-z0-9-_]+)\s*&lt;\/td>[^>]*>([^G]+)Gold&lt;\/td>[^>]*>([^&lt;]+)&lt;\/td>/gmi;
-  var reLoggedOut = /&lt;a href="alliances\.php\?id=([^"]*)">[^&lt;]*&lt;\/a>&lt;\/td>\s*&lt;td>&lt;a class="player" href="\/stats\.php\?id=([0-9]+)"\s*>([^&lt;]+)&lt;\/a>&lt;\/td>[^>]*>([0-9,]+)&lt;\/td>[^>]*>\s*([A-Za-z0-9-_]+)\s*&lt;\/td>[^>]*>([^G]+)Gold&lt;\/td>[^>]*>([^&lt;]+)&lt;\/td>/gmi;
+  var reLoggedIn = /&lt;td align="center" valign="middle" style="padding: 0">\s*(.*)\s*(.*)\s*&lt;\/td>\s*&lt;td.*>&lt;a href="alliances\.php\?id=([^"]*)">\s*([^&lt;]*)&lt;\/a>&lt;\/td>\s*&lt;td>&lt;a class="player" href="\/stats\.php\?id=([0-9]+)"\s*>([^&lt;]+)&lt;\/a>&lt;\/td>[^>]*>([0-9,]+)&lt;\/td>[^>]*>\s*([A-Za-z0-9-_]+)\s*&lt;\/td>[^>]*>([^G]+)Gold&lt;\/td>[^>]*>([^&lt;]+)&lt;\/td>/gmi;
+  var reLoggedOut = /&lt;a href="alliances\.php\?id=([^"]*)">\s*([^&lt;]*)&lt;\/a>&lt;\/td>\s*&lt;td>&lt;a class="player" href="\/stats\.php\?id=([0-9]+)"\s*>([^&lt;]+)&lt;\/a>&lt;\/td>[^>]*>([0-9,]+)&lt;\/td>[^>]*>\s*([A-Za-z0-9-_]+)\s*&lt;\/td>[^>]*>([^G]+)Gold&lt;\/td>[^>]*>([^&lt;]+)&lt;\/td>/gmi;
   var players = [];
   var loggedIn = false;
   var m;
@@ -113,16 +113,19 @@ parser.parseBattlefield = function (html) {
             player.buddyStatus = helpers.parseBuddyStatus(m[1]); // Buddy Information
             player.intelFile = helpers.parseIntelFile(m[2]);   // Spy Information
           }
-          player.alliance = m[startFrom];
-          player.userid = m[startFrom + 1];
-          player.username = m[startFrom + 2];
-          player.armySizeText = m[startFrom + 3];
-          player.armySize = helpers.quantityFromString(m[startFrom + 3]);
-          player.race = m[startFrom + 4];
-          player.goldText = m[startFrom + 5].trim();
-          player.gold = helpers.quantityFromString(m[startFrom + 5], -1);
-          player.rankText = m[startFrom + 6];
-          player.rank = helpers.quantityFromString(m[startFrom + 6], -1);
+          player.alliance = {
+            id: m[startFrom],
+            name: m[startFrom + 1].replace("&amp;nbsp;",""),
+          };
+          player.userid = m[startFrom + 2];
+          player.username = m[startFrom + 3];
+          player.armySizeText = m[startFrom + 4];
+          player.armySize = helpers.quantityFromString(m[startFrom + 4]);
+          player.race = m[startFrom + 5];
+          player.goldText = m[startFrom + 6].trim();
+          player.gold = helpers.quantityFromString(m[startFrom + 6], -1);
+          player.rankText = m[startFrom + 7];
+          player.rank = helpers.quantityFromString(m[startFrom + 7], -1);
           players.push(player);
         }
       }
@@ -370,7 +373,7 @@ parser.parseLeftSideBox = function (html) {
     return result;
 
   // Username and Fortification
-  var re = /&lt;title>Kings\s*of\s*Chaos\s*::\s*([^'&lt;,]+)[^ ]*\s*([^&lt;]+)&lt;\/title>/gmi;
+  var re = /&lt;title>Kings of Chaos :: ([a-zA-Z0-9]+)'s ([^&lt;]+)&lt;\/title>/i;
   var m = re.exec(html);
   result.username = (m !== null) ? m[1] : "???";
   result.fortification = (m !== null) ? m[2] : "???";
@@ -581,15 +584,31 @@ parser.parseFullStats = function (html) {
   if (html === undefined || html === null || !html.length)
     return {
       success: false,
-      error: "Empty page to parse"
+      error: "Empty page to parse",
     };
+  // Turing
+  var turing = this.getTuring(html);
+  result.turing = turing;
   // Main User Stats
-  var reUserStats = /Name:[\s&lt;tdrbpa>\/\\]*&lt;td>\s*([^\s]+)\s*&lt;\/td>[\s&lt;tdrbpa>\/\\]*Commander:\s*&lt;\/b>\s*&lt;\/td>\s*&lt;td[^>]*>\s*(.*)\s*&lt;\/td>[\s&lt;tdrbpa>\/\\]*Alliances:\s*&lt;\/b>\s*&lt;\/td>\s*&lt;td>\s*(.*)\s*&lt;\/td>[\s&lt;tdrbpa>\/\\]*Race:[\s&lt;tdrbpa>\/\\]*&lt;td>\s*([^&lt;\s]+)[\s&lt;tdrbpa>\/\\]*Rank:[\s&lt;tdrbpa>\/\\]*&lt;td>([^&lt;\s]+)[\s&lt;tdrbpa>\/\\]*Highest Rank:[\s&lt;tdrbpa>\/\\]*([^&lt;]+)[\s&lt;tdrbpa>\/\\]*Army\s*Size:[\s&lt;tdrbpa>\/\\]*([^&lt;\s]+)[\s&lt;tdrbpa>\/\\]*Army Morale:[\s&lt;tdrbpa>\/\\]*([^&lt;\s]+)/gmi;
+  var reNameCommander = /Name:[\s&lt;tdrbpa>\/\\]*&lt;td>\s*([^\s]+)\s*&lt;\/td>[\s&lt;tdrbpa>\/\\]*Commander:\s*&lt;\/b>\s*&lt;\/td>\s*&lt;td[^>]*>\s*(.*)\s*&lt;\/td>/gmi;
+  var mNameCommander = reNameCommander.exec(html);
+  var reSupremeCommander = /Supreme Commander\s*&lt;\/b>\s*&lt;\/td>\s*&lt;td[^>]*>\s*&lt;a href="stats\.php\?id=([0-9]+)">([^&lt;]+)&lt;\/a>\s*&lt;\/td>[\s&lt;tdrbpa>\/\\]*Chain Name:[\s&lt;tdrbpa>\/\\]*&lt;td>\s*([^&lt;]+)/gmi;
+  var mSupremeCommander = reSupremeCommander.exec(html);
+  var supremeCommander = mSupremeCommander === null ? {
+    username: "None",
+    userid: -1,
+  } : {
+    username: mSupremeCommander[2],
+    userid: helpers.quantityFromString(mSupremeCommander[1]),
+  };
+  var chainName = mSupremeCommander === null ? "" : mSupremeCommander[3];
+  var reUserStats = /Alliances:\s*&lt;\/b>\s*&lt;\/td>\s*&lt;td>\s*(.*)\s*&lt;\/td>[\s&lt;tdrbpa>\/\\]*Race:[\s&lt;tdrbpa>\/\\]*&lt;td>\s*([^&lt;\s]+)[\s&lt;tdrbpa>\/\\]*Rank:[\s&lt;tdrbpa>\/\\]*&lt;td>([^&lt;\s]+)[\s&lt;tdrbpa>\/\\]*Highest Rank:[\s&lt;tdrbpa>\/\\]*([^&lt;]+)[\s&lt;tdrbpa>\/\\]*Army\s*Size:[\s&lt;tdrbpa>\/\\]*([^&lt;\s]+)[\s&lt;tdrbpa>\/\\]*Army Morale:[\s&lt;tdrbpa>\/\\]*([^&lt;\s]+)/gmi;
   var mUserStats = reUserStats.exec(html);
   if (mUserStats === null)
     return {
       success: false,
-      error: "Failed to parse user stats"
+      error: "Failed to parse user stats",
+      turing: turing,
     };
   result.success = true;
   // Gold
@@ -608,24 +627,24 @@ parser.parseFullStats = function (html) {
   }
   // Parse the commander
   var reCommander = /id=(\d*)">([^&lt;]*)/gmi;
-  var mCommander = reCommander.exec(mUserStats[2]);
-  var commanderUsername = (mCommander === null) ? mUserStats[2] : mCommander[2];
-  var commanderUserid = (mCommander === null) ? -1 : mCommander[1];
+  var mCommander = reCommander.exec(mNameCommander[2]);
+  var commanderUsername = (mCommander === null) ? mNameCommander[2] : mCommander[2];
+  var commanderUserid = (mCommander === null) ? -1 : helpers.quantityFromString(mCommander[1]);
   // Parse the primary alliance
   var rePrimaryAlliance = /id=(\d*)">\s*([^&lt;]+)\s*&lt;\/a>\s*&lt;\/b>\s*\(\s*Primary/gmi;
-  var mPrimaryAlliance = rePrimaryAlliance.exec(mUserStats[3]);
+  var mPrimaryAlliance = rePrimaryAlliance.exec(mUserStats[1]);
   var primaryAlliance = mPrimaryAlliance !== null ? {
     name: mPrimaryAlliance[2],
-    id: mPrimaryAlliance[1]
+    id: helpers.quantityFromString(mPrimaryAlliance[1]),
   } : {
     name: "",
-    id: -1
+    id: -1,
   };
   // Parse the alliance(s)
   var reAlliances = /id=(\d*)">([^&lt;]*)/gmi;
   var mAlliances;
   var alliances = [];
-  while ((mAlliances = reAlliances.exec(mUserStats[3])) !== null) {
+  while ((mAlliances = reAlliances.exec(mUserStats[1])) !== null) {
     alliances.push({
       name: mAlliances[2],
       id: mAlliances[1],
@@ -639,7 +658,7 @@ parser.parseFullStats = function (html) {
   while ((mOfficers = reOfficers.exec(html)) !== null) {
     officers.push({
       username: mOfficers[2],
-      userid: mOfficers[1],
+      userid: helpers.quantityFromString(mOfficers[1]),
       rank: mOfficers[3],
       armySize: mOfficers[4],
       race: mOfficers[5].trim()
@@ -650,16 +669,18 @@ parser.parseFullStats = function (html) {
   var mTotalOfficers = reTotalOfficers.exec(html);
   var totalOfficersNb = mTotalOfficers === null ? 0 : mTotalOfficers[1];
   result.user = {
-    username: mUserStats[1],
+    username: mNameCommander[1],
     commander: {
       username: commanderUsername,
-      userid: commanderUserid
+      userid: commanderUserid,
     },
-    race: mUserStats[4],
-    rank: mUserStats[5],
-    highestRank: mUserStats[6],
-    armySize: mUserStats[7],
-    armyMorale: mUserStats[8],
+    supremeCommander: supremeCommander,
+    chainName: chainName,
+    race: mUserStats[2],
+    rank: mUserStats[3],
+    highestRank: mUserStats[4],
+    armySize: mUserStats[5],
+    armyMorale: mUserStats[6],
     fortification: fortification,
     buddyStatus: buddyStatus,
     gold: gold,
@@ -667,11 +688,86 @@ parser.parseFullStats = function (html) {
     alliances: alliances,
     primaryAlliance: primaryAlliance,
     officers: officers,
-    totalOfficersNb: Number(totalOfficersNb)
+    totalOfficersNb: Number(totalOfficersNb),
   };
   return result;
 };
 
+/**
+ * Parse the quick stats (xhr from the battlefield)
+ * @param html
+ * @returns {Object} parsed quick stats
+ */
+parser.parseQuickStats = function(html) {
+  if (html === undefined || html === null || !html.length)
+    return {
+      success: false,
+      error: "Empty page to parse",
+    };
+
+  // Turing
+  var turing = this.getTuring(html);
+
+  // Full Profile Link
+  var reFullProfile = /Full Profile:&lt;\/b>&lt;\/td>\s*&lt;td>&lt;a href="stats\.php\?id=([0-9]+)">([^&lt;]+)&lt;\/a>&lt;\/td>/i;
+  var mFullProfile = reFullProfile.exec(html);
+  if(mFullProfile===null){
+    return {
+      success: false,
+      error: "Failed parsing the full profile link in the quick stats",
+      turing: turing,
+    };
+  }
+  var userid = helpers.quantityFromString(mFullProfile[1], -1);
+  var username = mFullProfile[2];
+
+  // Commander
+  var reCommander = /Commander:&lt;\/b>&lt;\/td>\s*&lt;td>([^\n]+)/i;
+  var mCommander  = reCommander.exec(html);
+  var commander = (mCommander!==null) ? helpers.parseUser(mCommander[1]) : { username: '???' };
+
+  // Supreme Commander
+  var reSupremeCommander = /Supreme Commander&lt;\/b>&lt;\/td>\s*&lt;td>([^\n]+)/i;
+  var mSupremeCommander  = reSupremeCommander.exec(html);
+  var supremeCommander = (mSupremeCommander!==null) ? helpers.parseUser(mSupremeCommander[1]) : { username: 'None' };
+
+
+  // Highest Rank, Treasury, Fortification
+  var reRankTreasuryFortification = /Highest Rank[^\n]*\s*&lt;td>([^\n]+)&lt;\/td>[\sa-zA-Z,-&lt;>\/\\]+Treasury[^\n]*\s*&lt;td>([^\n]+)&lt;\/td>[\sa-zA-Z,-&lt;>\/\\]+Fortifications[^\n]*\s*&lt;td>([^&lt;]+)/i;
+  var mRankTreasuryFortification  = reRankTreasuryFortification.exec(html);
+  var highestRank = '???', fortification = '???', treasuryAsText = '???', treasury = -1;
+  if(mRankTreasuryFortification!==null){
+    highestRank = mRankTreasuryFortification[1];
+    fortification = mRankTreasuryFortification[3];
+    treasury = helpers.quantityFromString(mRankTreasuryFortification[2]);
+    treasuryAsText = helpers.stripHtml(mRankTreasuryFortification[2]);
+  }
+
+  // Buddy List Status
+  var reBuddyStatus = /&lt;option\s*label="([^"]+)"\s*value="([^"]+)"\s*selected="selected">/i;
+  var mBuddyStatus  = reBuddyStatus.exec(html);
+  var buddyStatus = (mBuddyStatus!==null) ? mBuddyStatus[1] : 'none';
+
+  return {
+    success: true,
+    userid: userid,
+    username: username,
+    commander: commander,
+    supremeCommander: supremeCommander,
+    highestRank: highestRank,
+    treasury: treasury,
+    treasuryAsText: treasuryAsText,
+    fortification: fortification,
+    buddyStatus: buddyStatus,
+    turing: turing,
+  }
+};
+
+/**
+ * Parse the armory from HTML to an object
+ * @param html
+ * @returns {Object} parsed armory
+ */
 parser.parseArmory = function (html) {
   if (html === undefined || html === null || !html.length)
     return {
@@ -704,13 +800,10 @@ parser.parseArmory = function (html) {
   var mSellFor;
   var weaponsSellFor = [];
   while ((mSellFor = reSellFor.exec(html)) !== null) {
-    var rePrice = /([0-9,]+)/;
-    var mPrice = rePrice.exec(mSellFor[2]);
-    var price = (mPrice !== null) ? Number(mPrice[1].replace(/,/g, "")) : 0;
     weaponsSellFor.push({
       inputName: mSellFor[1],
       priceText: mSellFor[2],
-      price: price
+      price: helpers.quantityFromString(mSellFor[2]),
     });
   }
   // Repair
@@ -738,7 +831,6 @@ parser.parseArmory = function (html) {
   }
   // Aggregate
   [reCurrentWeapons, reCurrentTools].forEach(function (regex) {
-    var i = 0;
     while ((mCurrentWeapons = regex.exec(html)) !== null) {
       var index = mCurrentWeapons.index;
       var category = getCategoryForIndex(index, weaponCategories);
@@ -746,24 +838,35 @@ parser.parseArmory = function (html) {
         currentWeapons[category] = [];
       var sell = {};
       var weaponId = -1;
-      if (i &lt; weaponsSellFor.length) {
-        sell = weaponsSellFor[i];
+      if (weaponsSellFor.length) {
+        sell = weaponsSellFor.shift();
         weaponId = helpers.quantityFromString(sell.inputName);
       }
       var quantity = helpers.quantityFromString(mCurrentWeapons[2]);
-      currentWeapons[category].push({
+      var strengthSplit = mCurrentWeapons[3].split('/');
+      var strengthCurrent = helpers.quantityFromString(mCurrentWeapons[3]);
+      var strengthMax = strengthCurrent;
+      if(strengthSplit.length>1){
+        strengthCurrent = helpers.quantityFromString(strengthSplit[0]);
+        strengthMax = helpers.quantityFromString(strengthSplit[1]);
+      }
+      var currentWeapon = {
         name: mCurrentWeapons[1],
         weaponId: weaponId,
         quantity: quantity,
-        strength: mCurrentWeapons[3],
+        strengthText: mCurrentWeapons[3],
+        strengthCurrent: strengthCurrent,
+        strengthMax: strengthMax,
         sell: sell,
-        repair: repairWeapons[weaponId]
-      });
-      i++;
+      };
+      if(repairWeapons[weaponId]!==undefined){
+        currentWeapon.repair = repairWeapons[weaponId];
+      }
+      currentWeapons[category].push(currentWeapon);
     }
   });
   // Get available weapons
-  var reBuyWeapons = /&lt;tr>\s*&lt;td>([^&lt;]+)&lt;\/td>\s*&lt;td\s*align="right"\s*>([^&lt;]+)&lt;\/td>\s*&lt;td\s*align="right"\s*>([^&lt;]+)&lt;\/td>\s*&lt;td\s*align="center"\s*>\s*&lt;input\s*type="text"\s*name="([^"]+)"\s*value="([^"])/gmi;
+  var reBuyWeapons = /&lt;tr>\s*&lt;td>([^&lt;]+)&lt;\/td>\s*&lt;td\s*align="right"\s*>([^&lt;]+)&lt;\/td>\s*&lt;td\s*align="right"\s*>([^&lt;]+)&lt;\/td>\s*&lt;td\s*align="center"\s*>\s*&lt;input\s*type="text"\s*name="([^"]+)"\s*value="([^"]*)/gmi;
   var mBuyWeapons;
   var buyWeapons = {};
   while ((mBuyWeapons = reBuyWeapons.exec(html)) !== null) {
@@ -835,7 +938,8 @@ parser.parsePersonnel = function (html) {
   var mPersonnel;
   var personnel = {};
   while ((mPersonnel = rePersonnel.exec(html)) !== null) {
-    personnel[mPersonnel[1]] = Number(mPersonnel[2]);
+    personnel[mPersonnel[1]] = helpers.quantityFromString(mPersonnel[2]);
+    personnel[mPersonnel[1]+' Text'] = mPersonnel[2];
   }
   return personnel;
 };
@@ -953,16 +1057,20 @@ parser.parseRecruit = function (html) {
       error: "Empty page to parse"
     };
   // Recruiting Preference is always there
-  var reRecruitPref = /input\s*type\s*=\s*"radio"\s*name\s*=\s*"([^"]+)"\s*value\s*=\s*"([^"]+)"\s*([^>]*)>([^&lt;]+)/gmi;
+  var reRecruitPref = /input\s*type\s*=\s*["']radio["']\s*name\s*=\s*["']\s*([^'"]+)["']\s*value\s*=\s*["']\s*([^'"]+)["']\s*([^>]*)>\s*([^&lt;]+)/gmi;
   var mRecruitPref;
   var recruitPref = [];
   var recruitPrefName = "clickPref";
+  var recruitPrefChecked = "";
   while ((mRecruitPref = reRecruitPref.exec(html)) !== null) {
     recruitPrefName = mRecruitPref[1];
+    var checked = mRecruitPref[3].trim() == 'checked';
+    if(checked)
+      recruitPrefChecked = mRecruitPref[4];
     recruitPref.push({
       name: mRecruitPref[4],
       value: mRecruitPref[2],
-      checked: mRecruitPref[3].trim() == 'checked',
+      checked: checked,
     });
   }
   // Hidden fields
@@ -971,6 +1079,15 @@ parser.parseRecruit = function (html) {
   var hiddenFields = {};
   while ((mHiddenFields = reHidden.exec(html)) !== null) {
     hiddenFields[mHiddenFields[1]] = mHiddenFields[2];
+  }
+  if(html.indexOf("There is no one left to click.") >= 0 ) {
+    return {
+      success: false,
+      error: "There is no one left to click.",
+      recruitPreference: recruitPrefChecked,
+      recruitPreferences: recruitPref,
+      recruitPreferencesInputName: recruitPrefName,
+    };
   }
   if (html.indexOf("&lt;h1>Invalid selection...&lt;/h1>") >= 0) {
     // Looks like you screwed up!
@@ -988,18 +1105,35 @@ parser.parseRecruit = function (html) {
       error: "Invalid Selection",
       challenge_url: challenge_url,
       hiddenFields: hiddenFields,
+      recruitPreference: recruitPrefChecked,
       recruitPreferences: recruitPref,
       recruitPreferencesInputName: recruitPrefName,
       challengeField: challengeField,
       challengeResponseField: challengeResponseField,
     };
   }
+
+  // Who are we recruiting for?
+  var reUser = /recruit for &lt;b>&lt;a href="stats\.php\?id=([0-9]+)">\s*([^&lt;]+)\s*&lt;\/a>/gmi;
+  var mUser = reUser.exec(html);
+  var user = mUser === null ? {
+    username: "",
+    userid: -1,
+  } : {
+    username: mUser[2],
+    userid:   helpers.quantityFromString(mUser[1]),
+  };
+
   var reRecruitJavascript = /document\.write\(\s*[']*&lt;([^)]+)/gmi;
   var mRecruitJavascript = reRecruitJavascript.exec(html);
   if (mRecruitJavascript === null)
     return {
       success: false,
       error: "Could not parse the javascript to get the image",
+      user: user,
+      recruitPreference: recruitPrefChecked,
+      recruitPreferences: recruitPref,
+      recruitPreferencesInputName: recruitPrefName,
     };
   var imageHtml = String(eval("String( '" + mRecruitJavascript[1] + ")"));
   var reRecruitImage = /img\s+src="([^"]+)/gmi;
@@ -1008,6 +1142,10 @@ parser.parseRecruit = function (html) {
     return {
       success: false,
       error: "Could not parse the image of the letter to type",
+      user: user,
+      recruitPreference: recruitPrefChecked,
+      recruitPreferences: recruitPref,
+      recruitPreferencesInputName: recruitPrefName,
     };
   var image = mRecruitImage[1];
   // Army Morale
@@ -1023,9 +1161,11 @@ parser.parseRecruit = function (html) {
     image: image,
     morale: morale,
     hiddenFields: hiddenFields,
+    recruitPreference: recruitPrefChecked,
     recruitPreferences: recruitPref,
     recruitPreferencesInputName: recruitPrefName,
-    fieldName: fieldName
+    fieldName: fieldName,
+    user: user,
   };
 };
 
@@ -1091,6 +1231,36 @@ parser.parseAttackLog = function (html) {
       attacksByYouMaxPage = mTotal[3];
     }
   }
+
+  // Retrieve the Back / Next pages so front-end doesn't have to compute
+  var attacksByYouIndex = html.indexOf('Attacks by You');
+  var reBack = /attacklog\.php\?b_start=([0-9]*)&amp;o_start=([0-9]*)">[^ ]+ Back/gmi;
+  var reNext = /attacklog\.php\?b_start=([0-9]*)&amp;o_start=([0-9]*)">Next/gmi;
+  var mBack, mNext;
+  var attacksOnYouBack ={}, attacksOnYouNext = {};
+  var attacksByYouBack = {}, attacksByYouNext = {};
+  var parameters = {};
+  while((mBack = reBack.exec(html)) !== null ){
+    parameters = {
+      b_start: helpers.quantityFromString(mBack[1], 0),
+      o_start: helpers.quantityFromString(mBack[2], 0),
+    };
+    if(mBack.index &lt; attacksByYouIndex)
+      attacksOnYouBack = parameters;
+    else
+      attacksByYouBack = parameters;
+  }
+  while((mNext = reNext.exec(html)) !== null ){
+    parameters = {
+      b_start: helpers.quantityFromString(mNext[1], 0),
+      o_start: helpers.quantityFromString(mNext[2], 0),
+    };
+    if(mNext.index &lt; attacksByYouIndex)
+      attacksOnYouNext = parameters;
+    else
+      attacksByYouNext = parameters;
+  }
+
   return {
     success: true,
     attacksOnYou: {
@@ -1098,12 +1268,16 @@ parser.parseAttackLog = function (html) {
       total: helpers.quantityFromString(attacksOnYouTotal),
       currentPage: helpers.quantityFromString(attacksOnYouCurrentPage),
       maxPage: helpers.quantityFromString(attacksOnYouMaxPage),
+      backPage: attacksOnYouBack,
+      nextPage: attacksOnYouNext,
     },
     attacksByYou: {
       attacks: attacksByYou,
       total: helpers.quantityFromString(attacksByYouTotal),
       currentPage: helpers.quantityFromString(attacksByYouCurrentPage),
       maxPage: helpers.quantityFromString(attacksByYouMaxPage),
+      backPage: attacksByYouBack,
+      nextPage: attacksByYouNext,
     },
   };
 };
@@ -1158,6 +1332,36 @@ parser.parseIntelligence = function (html) {
       asset_id: helpers.quantityFromString(mFiles[3]),
     });
   }
+
+  // Retrieve the Back / Next pages so front-end doesn't have to compute
+  var attacksByYouIndex = html.indexOf('Attacks by You');
+  var reBack = /intel\.php\?b_start=([0-9]*)&amp;o_start=([0-9]*)">[^ ]+ Back/gmi;
+  var reNext = /intel\.php\?b_start=([0-9]*)&amp;o_start=([0-9]*)">Next/gmi;
+  var mBack, mNext;
+  var interceptedBack ={}, interceptedNext = {};
+  var filesBack = {}, filesNext = {};
+  var parameters = {};
+  while((mBack = reBack.exec(html)) !== null ){
+    parameters = {
+      b_start: helpers.quantityFromString(mBack[1], 0),
+      o_start: helpers.quantityFromString(mBack[2], 0),
+    };
+    if(mBack.index &lt; attacksByYouIndex)
+      interceptedBack = parameters;
+    else
+      filesBack = parameters;
+  }
+  while((mNext = reNext.exec(html)) !== null ){
+    parameters = {
+      b_start: helpers.quantityFromString(mNext[1], 0),
+      o_start: helpers.quantityFromString(mNext[2], 0),
+    };
+    if(mNext.index &lt; attacksByYouIndex)
+      interceptedNext = parameters;
+    else
+      filesNext = parameters;
+  }
+
   return {
     success: true,
     intercepted: {
@@ -1165,22 +1369,37 @@ parser.parseIntelligence = function (html) {
       total: interceptedTotal,
       currentPage: interceptedCurrent,
       maxPage: interceptedMax,
+      backPage: interceptedBack,
+      nextPage: interceptedNext,
     },
     files: {
       reports: files,
       total: filesTotal,
       currentPage: filesCurrent,
       maxPage: filesMax,
+      backPage: filesBack,
+      nextPage: filesNext,
     }
   };
 };
 
-parser.parseBattleReport = function (html) {
+parser.parseBattleReport = function (html, location, userid) {
+  // attack_id from location
+  var attackId = -1;
+  if(location!==undefined &amp;&amp; location!==null &amp;&amp; location.length){
+    var reAttackId = /attack_id=([0-9]+)/;
+    var mAttackId  = reAttackId.exec(location);
+    attackId = (mAttackId!==null) ? helpers.quantityFromString(mAttackId[1]) : -1;
+  }
+
   if (html === undefined || html === null || !html.length)
     return {
       success: false,
-      error: "Empty page to parse"
+      error: "Empty page to parse",
+      userid: userid === undefined ? -1 : userid,
+      attackId: attackId,
     };
+
   var re = /&lt;td class="report"[^>]*>([a-zA-Z&lt;>':0-9\/=",.!-?\s]+)&lt;\/td>/gmi;
   var m = re.exec(html);
   if (m === null) {
@@ -1188,11 +1407,15 @@ parser.parseBattleReport = function (html) {
       success: false,
       error: "Unable to parse the battle report",
       details: html,
+      userid: userid === undefined ? -1 : userid,
+      attackId: attackId,
     };
   }
   return {
     success: true,
     report: m[1].trim(),
+    attackId: attackId,
+    userid: userid === undefined ? -1 : userid,
   };
 };
 
@@ -1207,6 +1430,11 @@ parser.parseIntelFile = function (html) {
       success: false,
       error: "Empty page to parse"
     };
+
+  // Username
+  var reUsername = /Intelligence on ([^&lt;]+)/gmi;
+  var mUsername  = reUsername.exec(html);
+  var username = mUsername === null ? "" : mUsername[1];
 
   // Details
   var re = /&lt;td align="right">([^&lt;]+)&lt;\/td>\s*&lt;td align="left">([^&lt;]+)&lt;\/td>\s*&lt;td align="right">([^&lt;]+)&lt;\/td>\s*&lt;td align="right">([^&lt;]+)&lt;\/td>\s*&lt;td align="center">.*inteldetail\.php\?report_id=([0-9]+)">([^&lt;]+)/gmi;
@@ -1240,6 +1468,7 @@ parser.parseIntelFile = function (html) {
       currentPage: currentPage,
       maxPage: maxPage,
       total: total,
+      username: username,
     };
   }
   else {
@@ -1251,18 +1480,38 @@ parser.parseIntelFile = function (html) {
 };
 
 // Parse Intel Details
-parser.parseIntelDetail = function (html) {
+parser.parseIntelDetail = function (html, location, userid) {
+
+  // report_id from location
+  var reportId = -1;
+  if(location!==undefined &amp;&amp; location!==null &amp;&amp; location.length){
+    var reReportId = /report_id=([0-9]+)/;
+    var mReportId  = reReportId.exec(location);
+    reportId = (mReportId!==null) ? helpers.quantityFromString(mReportId[1]) : -1;
+  }
+
   if (html === undefined || html === null || !html.length)
     return {
       success: false,
-      error: "Empty page to parse"
+      error: "Empty page to parse",
+      reportId: reportId,
+      userid: userid !== undefined ? userid : -1,
     };
 
   // Story
   var storyHeader = "Covert Mission Report";
   var storyStart = html.indexOf( storyHeader ) + storyHeader.length;
-  var storyEnd = html.indexOf( "&lt;br>", storyStart );
-  var story = helpers.stripHtml(html.substr(storyStart, storyEnd-storyStart)).trim();
+  var story = "";
+  var username = "";
+  if( storyStart >= 0 )
+  {
+    var storyEnd = html.indexOf( "&lt;br>", storyStart );
+    story = helpers.stripHtml(html.substr(storyStart, storyEnd-storyStart)).trim();
+    // Find out the username from the story
+    var reUsername = /into ([^']+)'s/gmi;
+    var mUsername = reUsername.exec(story);
+    username = (mUsername!==null) ? mUsername[1] : "";
+  }
 
   //Military Stats
   var reMilitaryStats = /&lt;td>([ a-zA-Z0-9,:]+)&lt;\/td>\s*&lt;td align="right">([ a-zA-Z0-9,?]+)&lt;\/td>\s*&lt;\/tr>/gmi;
@@ -1309,6 +1558,9 @@ parser.parseIntelDetail = function (html) {
       });
   }
 
+  var spySuccess = mTreasury !== null;
+  var success = spySuccess || story.length > 0;
+
   return {
     story: story,
     army: armySize,
@@ -1316,7 +1568,11 @@ parser.parseIntelDetail = function (html) {
     treasuryText: treasuryText,
     treasury: treasury,
     weapons: weapons,
-    success: mTreasury !== null,
+    username: username,
+    success: success,
+    spySuccess: spySuccess,
+    reportId: reportId,
+    userid: userid !== undefined ? userid : -1,
   };
 };
 
@@ -1336,7 +1592,7 @@ module.exports = parser;</code></pre>
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Sat Dec 06 2014 23:44:09 GMT+0900 (Tokyo Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Sun Apr 12 2015 08:47:16 GMT+0900 (Tokyo Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

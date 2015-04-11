@@ -148,7 +148,9 @@ koc.prototype.setSession = function (new_session) {
  * @return {String} current session id
  */
 koc.prototype.getSession = function () {
-  return this.session;
+  var session = this.session;
+  if(session===undefined) session = "";
+  return session;
 };
 
 /**
@@ -163,24 +165,30 @@ koc.prototype.hasSession = function () {
 /**
  * Wrapper to prepare a response having all the fields. Especially adds the
  * session and the last known location.
+ * Nest the result under "result", keeping top-level error/success
  */
-koc.prototype.prepareResponse = function (response) {
+koc.prototype.prepareResponse = function (result) {
+  // nest the response under "result", keeping top-level error/success
+  var response = {
+    result : result,
+    error  : (result.error   === undefined) ?    "" : result.error,
+    success: (result.success === undefined) ? false : result.success,
+  };
   // append the session to the response
   response.session = this.getSession();
   response.location = this.location;
   response.stats = this.stats;
   if (this.help.length > 0)
     response.help = this.help;
-  // The verify and error pages notably doesn't show the username and fortification in the title
+  // The verify and error pages notably don't show the username and fortification in the title
   // Check and get it from the last known username instead
   if (this.stats.username !== undefined &amp;&amp; this.stats.username.indexOf(" ") >= 0)
     this.stats.username = this.username;
   if (this.stats.fortification !== undefined &amp;&amp; this.stats.fortification.indexOf(",") >= 0)
     this.stats.fortification = "???";
-  if (response.error === undefined)
-    response.error = "";
   if (this.age > 0)
     response.age = this.age;
+  response.kocHost = this.koc_host;
   // if (this.menu.length>0)
   //     response.menu = this.menu;
   return response;
@@ -208,7 +216,7 @@ koc.prototype.setDefaultCommanderChangeStatement = function (new_value) {
  */
 koc.prototype.getRequestOptions = function (method, page, params, xhr) {
   var koc_session = "";
-  if (this.getSession() !== undefined &amp;&amp; this.getSession().length > 0) {
+  if (this.getSession().length > 0) {
     koc_session = " " + this.getKoCSessionCookieName() + "=" + this.getSession();
   }
   var options = {
@@ -262,7 +270,7 @@ koc.prototype.updateKocSession = function (headers) {
  * Given express options, create and return a request promise to KoC server
  * @param {Object} options The options to send to request
  * @param {function} onSuccess Callback to call on success
- * @return {Object} the HTTP request promise (use .then() and .fail() on it)
+ * @return {Q.Promise} the HTTP request promise (use .then() and .fail() on it)
  */
 koc.prototype.createRequestPromise = function (options, onSuccess) {
   var _koc = this;
@@ -325,7 +333,7 @@ koc.prototype.createRequestPromise = function (options, onSuccess) {
  * @param {Object} params Parameters for GET and POST requests
  * @param {function} onSuccess Callback to call on success
  * @param {Boolean} [xhr=false] Whether or not request through XHR (Ajax)
- * @return {Object} the HTTP request promise (use .then() and .fail() on it)
+ * @return {Q.Promise} the HTTP request promise (use .then() and .fail() on it)
  */
 koc.prototype.requestPage = function (mustBeLoggedIn, method, page, params, onSuccess, xhr) {
   // Check if we need to be logged in
@@ -341,7 +349,7 @@ koc.prototype.requestPage = function (mustBeLoggedIn, method, page, params, onSu
   if (params !== undefined &amp;&amp; params !== null &amp;&amp; params.usrname !== undefined)
     _koc.username = params.usrname;
   // If no koc_session, need to request one first
-  if (_koc.getSession() === undefined || !_koc.getSession().length) {
+  if (!_koc.getSession().length) {
     // Request only headers to get a new koc_session
     _koc.location = "/";
     return request(_koc.getRequestOptions("HEAD", ""))
@@ -661,7 +669,7 @@ koc.prototype.getLeftMenuInfo = function () {
       return _koc.prepareResponse({
         success: true,
         user: _koc.parser.parseBase(body),
-        menu: _koc.parser.parseMenu()
+        menu: _koc.parser.parseMenu(body),
       });
     });
 };
@@ -782,6 +790,19 @@ koc.prototype.logout = function () {
         details: response
       });
     });
+};
+
+koc.prototype.getQuickStats = function (id) {
+  var _koc = this;
+  if (!isFinite(id))
+    return Q(_koc.prepareResponse({
+      success: false,
+      error: "Specify an user id which is a number",
+      user: {}
+    }));
+  return _koc.requestPage(true, "GET", "stats.php", {id: id}, function (response, body) {
+    return _koc.prepareResponse(_koc.parser.parseQuickStats(body));
+  }, true);
 };
 
 koc.prototype.getFullStats = function (id) {
@@ -925,6 +946,12 @@ koc.prototype.clicker = function (data) {
 // Attack Log
 // b_start: by you
 // o_start: on you
+/**
+ * Retrieve the attack log
+ * @param b_start {number} page (by you)
+ * @param o_start {number} page (on you)
+ * @returns {Q.Promise}
+ */
 koc.prototype.attackLog = function (b_start, o_start) {
   var _koc = this;
   if (b_start === undefined || !isFinite(Number(b_start)))
@@ -942,6 +969,12 @@ koc.prototype.attackLog = function (b_start, o_start) {
 // Spy Log (Intelligence)
 // b_start: files start
 // o_start: intercepted start
+/**
+ * Retrieve the intelligence log
+ * @param files_start {number} page (b_start : by you)
+ * @param intercepted_start {number} page (o_start : on you)
+ * @returns {Q.Promise}
+ */
 koc.prototype.intelligence = function (files_start, intercepted_start) {
   var _koc = this;
   if (files_start === undefined || !isFinite(Number(files_start)))
@@ -956,7 +989,24 @@ koc.prototype.intelligence = function (files_start, intercepted_start) {
   }, true);
 };
 
+// Attack
+/**
+ * Retrieve the page of the battlefield we are listed on
+ * @returns {Q.Promise}
+ */
+koc.prototype.attackfield = function() {
+  var _koc = this;
+  return _koc.requestPage(true, "GET", "attack.php", null, function (response, body) {
+    return _koc.prepareResponse(_koc.parser.parseBattlefield(body));
+  }, false);
+};
+
 // Battlefield
+/**
+ * Retrieve the given battlefield page
+ * @param page {number}
+ * @returns {Q.Promise}
+ */
 koc.prototype.battlefield = function (page) {
   var _koc = this;
   if (page === undefined || !isFinite(Number(page)))
@@ -975,6 +1025,11 @@ koc.prototype.battlefield = function (page) {
 };
 
 // Battle Report
+/**
+ * Retrieve the battle report
+ * @param attack_id {number}
+ * @returns {Q.Promise}
+ */
 koc.prototype.battleReport = function (attack_id) {
   var _koc = this;
   return _koc.requestPage(true, "GET", "detail.php", {attack_id: attack_id}, function (response, body) {
@@ -985,7 +1040,8 @@ koc.prototype.battleReport = function (attack_id) {
 // Intel File
 /**
  * Retrieve the intelligence files for the given asset_id
- * @param asset_id usually same as the user_id
+ * @param asset_id {number} usually same as the user_id
+ * @returns {Q.Promise}
  */
 koc.prototype.intelFile = function (asset_id) {
   var _koc = this;
@@ -996,18 +1052,210 @@ koc.prototype.intelFile = function (asset_id) {
 
 /**
  * Retrieve the spy report for given report_id
- * @param report_id
- * @returns {Object}
+ * @param report_id {number}
+ * @returns {Q.Promise}
  */
 koc.prototype.intelDetail = function (report_id) {
   var _koc = this;
   return _koc.requestPage(true, "GET", "inteldetail.php", {report_id: report_id}, function (response, body) {
-    return _koc.prepareResponse(_koc.parser.parseIntelDetail(body));
+    var intelDetail = _koc.parser.parseIntelDetail(body, response.request.path);
+    return _koc.prepareResponse(intelDetail);
   });
 };
 
-// TODO: Spy
-// TODO: Attack
+/**
+ * Retrieve the index
+ * @returns {Q.Promise}
+ */
+koc.prototype.index = function() {
+  var _koc = this;
+  return _koc.requestPage(false, "GET", "index.php", null, function () {
+    return _koc.prepareResponse({});
+  });
+};
+
+/**
+ * Spy the given user and return the intel detail in case of success
+ * @param userid {number} userid of the defender
+ * @param turing {string=} turing of this page
+ * @returns {Q.Promise}
+ */
+koc.prototype.recon = function(userid, turing) {
+  var _koc = this;
+
+  // If turing is not passed, get it from stats.php?id=userid
+  if( turing === undefined || turing === null || !turing.length ) {
+    return _koc.getQuickStats(userid)
+      .then(function (quickStats) {
+        if (quickStats.result !== undefined
+          &amp;&amp; quickStats.result.turing !== undefined
+          &amp;&amp; quickStats.result.turing !== null
+          &amp;&amp; quickStats.result.turing.length) {
+          return _koc.recon(userid, quickStats.result.turing); // recurse with the turing
+        }
+        return _koc.prepareResponse({
+          success: false,
+          error: "Failed to get the turing from the quick stats",
+          details: quickStats,
+        });
+      })
+      .fail(function (error) {
+        return _koc.prepareResponse({
+          success: false,
+          error: "Failed to get the quick stats",
+          details: error,
+        });
+      });
+  }
+  else {
+    var data = {
+      turing: turing,
+      mission_type: 'recon',
+      defender_id: userid,
+    };
+    if( _koc.reconData === undefined ) {
+      // That's the first time we're called, setup our reconData
+      // in case we need to recurse with a new turing
+      _koc.reconData = {
+        attemptNb: 0,
+        userid: userid,
+      }
+    }
+    _koc.reconData.attemptNb++;
+    return _koc.requestPage(true, "POST", "attack.php", data, function (response, body) {
+      // If we're on the intel detail, it's all good, we can parse it and return it
+      if( response.request.uri.pathname == '/inteldetail.php' ) {
+        var intelDetail = _koc.parser.parseIntelDetail(body, response.request.path, _koc.reconData.userid);
+        return _koc.prepareResponse(intelDetail);
+      }
+      // If we have the wrong turing, we are redirected to attack.php
+      // We can try to get the new turing and try again
+      if( response.request.uri.pathname == '/attack.php' ) {
+        if(_koc.reconData.attemptNb > 3) {
+          return _koc.prepareResponse({
+            success: false,
+            error: "Failed after 3 attempts",
+          });
+        }
+        // Get the new turing
+        var newTuring = _koc.parser.getTuring(body);
+        // Call itself
+        return _koc.recon(_koc.reconData.userid, newTuring);
+      }
+      return _koc.prepareResponse({
+        success: false,
+        error: "I don't know how to handle " + response.request.path,
+      });
+    });
+  }
+};
+
+/**
+ * Attack or Raid the given user with the given turing (optional)
+ * @param {String} attack_type
+ * @param {Number} userid
+ * @param {String=} turing
+ * @returns {Q.Promise}
+ */
+koc.prototype.attackOrRaid = function(attack_type, userid, turing) {
+  var _koc = this;
+  if(attack_type!=='attack'&amp;&amp;attack_type!='raid'){
+    return _koc.prepareResponse({
+      success: false,
+      error: "Please specify the attack_type ('attack' or 'raid')",
+    });
+  }
+  // If turing is not passed, get it from stats.php?id=userid
+  if( turing === undefined || turing === null || !turing.length ) {
+    return _koc.getQuickStats(userid)
+      .then(function (quickStats) {
+        if (quickStats.result !== undefined
+          &amp;&amp; quickStats.result.turing !== undefined
+          &amp;&amp; quickStats.result.turing !== null
+          &amp;&amp; quickStats.result.turing.length) {
+          return _koc.attack(userid, quickStats.result.turing); // recurse with the turing
+        }
+        return _koc.prepareResponse({
+          success: false,
+          error: "Failed to get the turing from the quick stats",
+          details: quickStats,
+        });
+      })
+      .fail(function (error) {
+        return _koc.prepareResponse({
+          success: false,
+          error: "Failed to get the quick stats",
+          details: error,
+        });
+      });
+  }
+  else {
+    var data = {
+      turing: turing,
+      attack_type: attack_type,
+      defender_id: userid,
+      attackbut: (attack_type == 'attack') ? 'Attack Now!' : 'Raid Now!',
+    };
+    if( _koc.attackData === undefined ) {
+      // That's the first time we're called, setup our attackData
+      // in case we need to recurse with a new turing
+      _koc.attackData = {
+        attemptNb: 0,
+        userid: userid,
+      }
+    }
+    _koc.attackData.attemptNb++;
+    return _koc.requestPage(true, "POST", "attack.php", data, function (response, body) {
+      // If we're on the intel detail, it's all good, we can parse it and return it
+      if( response.request.uri.pathname == '/detail.php' ) {
+        var battleReport = _koc.parser.parseBattleReport(body, response.request.path, _koc.attackData.userid);
+        return _koc.prepareResponse(battleReport);
+      }
+      // If we have the wrong turing, we are redirected to attack.php
+      // We can try to get the new turing and try again
+      if( response.request.uri.pathname == '/attack.php' ) {
+        if(_koc.attackData.attemptNb > 3) {
+          return _koc.prepareResponse({
+            success: false,
+            error: "Failed after 3 attempts",
+            details: {
+              html: body,
+            }
+          });
+        }
+        // Get the new turing
+        var newTuring = _koc.parser.getTuring(body);
+        // Call itself
+        return _koc.attack(_koc.attackData.userid, newTuring);
+      }
+      return _koc.prepareResponse({
+        success: false,
+        error: "I don't know how to handle " + response.request.path,
+      });
+    });
+  }
+};
+
+/**
+ * Attack the given user and return the attack detail in case of success
+ * @param userid {number} userid of the defender
+ * @param turing {string=} turing of this page (optional)
+ * @returns {Q.Promise}
+ */
+koc.prototype.attack = function(userid, turing) {
+  return this.attackOrRaid('attack', userid, turing);
+};
+
+/**
+ * Raid the given user and return the attack detail in case of success
+ * @param userid {number} userid of the defender
+ * @param turing {string=} turing of this page (optional)
+ * @returns {Q.Promise}
+ */
+koc.prototype.raid = function(userid, turing) {
+  return this.attackOrRaid('raid', userid, turing);
+};
+
 // TODO: Sab
 
 
@@ -1027,7 +1275,7 @@ module.exports = koc;</code></pre>
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Sat Dec 06 2014 23:44:09 GMT+0900 (Tokyo Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Sun Apr 12 2015 08:47:16 GMT+0900 (Tokyo Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
