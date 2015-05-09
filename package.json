@@ -1,6 +1,6 @@
 {
   "name": "koc",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Library to parse data from the online MMORPG Kings of Chaos",
   "main": "lib/koc.js",
   "scripts": {
