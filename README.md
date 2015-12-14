@@ -3,6 +3,10 @@
 Node library to parse data from the online MMORPG Kings of Chaos <br />
 This library is the 'core', or server-side / parser of a set of 3 libraries as shown in the diagram below
 
+[koc-ionic](../../../koc-ionic)<br />
+[koc-api](../../../koc-api)<br />
+[node-koc](../../../node-koc)<br />
+
 ![Relations between the libraries](http://i.imgur.com/pbDEWd2.png "Relations between the libraries")
 
 ### Install
