@@ -11,7 +11,7 @@ This library is the 'core', or server-side / parser of a set of 3 libraries as s
 
 ### Use
 
-Check lib/koc.js for the available functions.
+Check [lib/koc.js](lib/koc.js) for the available functions.
 
 #### Examples (non exhaustive):
 
