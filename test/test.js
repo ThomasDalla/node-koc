@@ -1394,12 +1394,14 @@ describe('Test Quantity From String', function () {
   var cases = [
     // input          , default  , output
     ["5,000", undefined, 5000],
+    ["5,000M", undefined, 5000000000],
     ["abc", undefined, "abc"],
     ["None", 0, 0],
     ["<1,87^", undefined, 187],
     ["-100", undefined, -100],
     ["one777two888", undefined, 777],
-    ["7,446,987 Gold", undefined, 7446987]
+    ["7,446,987 Gold", undefined, 7446987],
+    ["7,446,987M Gold", undefined, 7446987000000]
   ];
   cases.forEach(function (currentCase) {
     it("helpers.quantityFromString('" + currentCase[0] + "'," + currentCase[1] + ") == " + currentCase[2], function () {
