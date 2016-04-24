@@ -2027,6 +2027,45 @@ describe('Parse Inbox', function () {
 				}
       },
     ],
+    [ 'test/html/inbox_one-mail.html',
+      {
+        success: true,
+        inbox: {
+					totalMessages: 1,
+					currentPage: 1,
+					totalPages: 1,
+        	messages: [
+						{
+							messageId: 123456,
+							when: '3 hours ago',
+							from: {
+								userid: 4157260,
+								username: "CP_Bloodpirate_DES",
+							},
+							subject: "None",
+							content: "you need soldiers, you can not be given them .. BUT .. i can help you get them<br />\n\
+                    <br />\n\
+                    welcome to kingsofchaos. a war game played with virtual gold. only your time and the fun we have is real. we are the only true war alliance. most others are \"rankers\". we have never lost a war. in war communications is key and information is power. therefore our scripts are better than any others in the game. our best feature is NO \"made up rules\". all other big alliances have rules they want you to follow. we laugh at their rules.<br />\n\
+                    <br />\n\
+                    are you waiting for the new age like we are? how about preparing for it like us.. preparation is crucial to all wars. if you aren't prepared, you will loose.<br />\n\
+                    we have numerous veterans from all alliances in koc who were fed up with following made up rules. some might call us rebels. and just to be clear, we aren't an alliance of rogues. we are always looking for new players with new ideas to help win wars. some of our best warriors are new members like yourself. dedication and loyalty is what we want in members.<br />\n\
+                    we are here to support you as much as we hope you will help us .. we have members from all around the world. if you have any questions, please ask me.<br />\n\
+                    <br />\n\
+                    what I will do for you. if you are a new player, i will first teach you the basics of the game. then the finer points, to make you stronger faster than any other person can. how? i am retired and dedicated to the game. so, with my skill set, i will find you the best gold to steal on the battlefield, that will make you grow stronger. the stronger you get, the more fun the game will become. remember i am here to help and support you, so in the future you will help and support us and others. if you are an experienced player, we will accept the challenge of making you a more knowledgeable and therefore a better player.<br />\n\
+                    <br />\n\
+                    best of luck and have fun<br />\n\
+                    bloodpirate",
+						},
+					]
+        },
+        outbox: {
+					totalMessages: 0,
+					currentPage: 1,
+					totalPages: 1,
+					messages: []
+				}
+      },
+    ],
   ];
   htmlPaths.forEach(function (page) {
     var htmlPath = page[0];
