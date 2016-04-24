@@ -1995,3 +1995,48 @@ describe('Parse Quick Stats', function () {
     });
   });
 });
+
+// Test Inbox
+describe('Parse Inbox', function () {
+  var htmlPaths = [
+    [ 'test/html/inbox_in-only_unread.html',
+      {
+        success: true,
+        inbox: {
+					totalMessages: 1,
+					currentPage: 1,
+					totalPages: 1,
+        	messages: [
+						{
+							messageId: 123456,
+							when: '3 minutes ago',
+							from: {
+								userid: 654321,
+								username: "{{ThisIsUsername}}",
+							},
+							subject: "{{THIS IS THE MESSAGE SUBJECT}}",
+							content: "{{THIS IS THE MESSAGE CONTENT}}",
+						},
+					]
+        },
+        outbox: {
+					totalMessages: 0,
+					currentPage: 1,
+					totalPages: 1,
+					messages: []
+				}
+      },
+    ],
+  ];
+  htmlPaths.forEach(function (page) {
+    var htmlPath = page[0];
+    var expected = page[1];
+    describe('#local ' + htmlPath, function () {
+      var html = fs.readFileSync(htmlPath, 'utf8');
+      var result = koc.parser.parseInbox(html);
+      it('should be as expected', function () {
+        result.should.eql(expected);
+      });
+    });
+  });
+});

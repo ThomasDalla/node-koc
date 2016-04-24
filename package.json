@@ -1,6 +1,6 @@
 {
   "name": "koc",
-  "version": "0.5.8",
+  "version": "0.6.0",
   "description": "Library to parse data from the online MMORPG Kings of Chaos",
   "main": "lib/koc.js",
   "scripts": {
@@ -32,7 +32,7 @@
     "chai": "^1.9.2",
     "chai-as-promised": "^4.1.1",
     "del": "^1.1.0",
-    "gulp": "^3.8.10",
+    "gulp": "^3.9.1",
     "gulp-commonjs": "^0.1.0",
     "gulp-concat": "^2.4.1",
     "gulp-jsdoc": "^0.1.4",
